@@ -182,8 +182,25 @@ namespace Net.Pkcs11Interop.Common
         CKK_ARIA = 0x00000026,
 
         /// <summary>
+        /// GOST28147 key
+        /// </summary>
+        CKK_GOST28147 = 0x00000032,
+
+        /// <summary>
+        /// GOSTR3410 key
+        /// </summary>
+        CKK_GOSTR3410 = 0x00000030,
+
+        /// <summary>
+        /// GOSTR3411 key
+        /// </summary>
+        CKK_GOSTR3411 = 0x00000031,
+
+        /// <summary>
         /// Permanently reserved for token vendors
         /// </summary>
         CKK_VENDOR_DEFINED = 0x80000000
+
+
     }
 }

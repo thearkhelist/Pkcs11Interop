@@ -16,6 +16,7 @@ namespace Net.Pkcs11Interop.Tests
             //test2._01_SignAndVerifySinglePartTest();
             Testing test1 = new Testing();
             test1._01_GenerateKeyTest();
+            Console.WriteLine("Success. Press anything to exit.");
             Console.ReadLine();
             
         }

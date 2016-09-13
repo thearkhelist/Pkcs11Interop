@@ -1290,7 +1290,67 @@ namespace Net.Pkcs11Interop.Common
         /// Key derivation mechanism that uses the result of an AES-CBC encryption operation as the key value
         /// </summary>
         CKM_AES_CBC_ENCRYPT_DATA = 0x00001105,
-        
+
+        /// <summary>
+        /// CKM_GOST28147_KEY_GEN
+        /// </summary>
+        CKM_GOST28147_KEY_GEN = 0x00001220,
+
+        /// <summary>
+        /// CKM_GOSTR3410_KEY_PAIR_GEN
+        /// </summary>
+        CKM_GOSTR3410_KEY_PAIR_GEN = 0x00001200,
+
+        /// <summary>
+        /// CKM_GOSTR3410
+        /// </summary>
+        CKM_GOSTR3410 = 0x00001201,
+
+        /// <summary>
+        ///  CKM_GOSTR3410_WITH_GOSTR3411
+        /// </summary>
+        CKM_GOSTR3410_WITH_GOSTR3411 = 0x00001202,
+
+        /// <summary>
+        /// CKM_GOSTR3410_KEY_WRAP
+        /// </summary>
+        CKM_GOSTR3410_KEY_WRAP = 0x00001203,
+
+        /// <summary>
+        /// CKM_GOSTR3410_DERIVE
+        /// </summary>
+        CKM_GOSTR3410_DERIVE = 0x00001204,
+
+        /// <summary>
+        /// CKM_GOSTR3411
+        /// </summary>
+        CKM_GOSTR3411 = 0x00001210,
+
+        /// <summary>
+        /// CKM_GOSTR3411_HMAC
+        /// </summary>
+        CKM_GOSTR3411_HMAC = 0x00001211,
+
+        /// <summary>
+        /// CKM_GOST28147_ECB
+        /// </summary>
+        CKM_GOST28147_ECB = 0x00001221,
+
+        /// <summary>
+        /// CKM_GOST28147
+        /// </summary>
+        CKM_GOST28147 = 0x00001222,
+
+        /// <summary>
+        /// CKM_GOST28147_MAC
+        /// </summary>
+        CKM_GOST28147_MAC = 0x00001223,
+
+        /// <summary>
+        /// CKM_GOST28147_KEY_WRAP
+        /// </summary>
+        CKM_GOST28147_KEY_WRAP = 0x00001224,
+
         /// <summary>
         /// The DSA domain parameter generation mechanism
         /// </summary>
@@ -1305,6 +1365,8 @@ namespace Net.Pkcs11Interop.Common
         /// The X9.42 Diffie-Hellman domain parameter generation mechanism
         /// </summary>
         CKM_X9_42_DH_PARAMETER_GEN = 0x00002002,
+
+
 
         /// <summary>
         /// Permanently reserved for token vendors

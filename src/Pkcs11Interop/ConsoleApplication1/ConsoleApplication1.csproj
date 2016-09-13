@@ -58,10 +58,6 @@
       <Project>{9BC3EE70-6B0B-4B26-8C06-B7AE50BE202E}</Project>
       <Name>Pkcs11Interop</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TestProject1\TestProject1.csproj">
-      <Project>{F2443480-86D2-4AE7-B1BB-984C98FEDDD6}</Project>
-      <Name>TestProject1</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

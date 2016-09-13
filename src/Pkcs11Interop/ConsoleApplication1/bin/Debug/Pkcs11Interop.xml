@@ -1148,7 +1148,7 @@
         </member>
         <member name="F:Net.Pkcs11Interop.Common.CKK.CKK_GOST28147">
             <summary>
-            GOST 28147 key
+            GOST28147 key
             </summary>
         </member>
         <member name="F:Net.Pkcs11Interop.Common.CKK.CKK_GOSTR3410">
