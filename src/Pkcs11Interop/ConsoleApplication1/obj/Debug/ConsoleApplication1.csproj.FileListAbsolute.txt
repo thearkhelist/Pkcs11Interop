@@ -1,0 +1,12 @@
+F:\Pkcs11Interop-master\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\ConsoleApplication1.exe.config
+F:\Pkcs11Interop-master\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\ConsoleApplication1.exe
+F:\Pkcs11Interop-master\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\ConsoleApplication1.pdb
+F:\Pkcs11Interop-master\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\Pkcs11Interop.dll
+F:\Pkcs11Interop-master\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\TestProject1.dll
+F:\Pkcs11Interop-master\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll
+F:\Pkcs11Interop-master\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\Pkcs11Interop.pdb
+F:\Pkcs11Interop-master\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\Pkcs11Interop.xml
+F:\Pkcs11Interop-master\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\TestProject1.pdb
+F:\Pkcs11Interop-master\src\Pkcs11Interop\ConsoleApplication1\obj\Debug\ConsoleApplication1.csprojResolveAssemblyReference.cache
+F:\Pkcs11Interop-master\src\Pkcs11Interop\ConsoleApplication1\obj\Debug\ConsoleApplication1.exe
+F:\Pkcs11Interop-master\src\Pkcs11Interop\ConsoleApplication1\obj\Debug\ConsoleApplication1.pdb
