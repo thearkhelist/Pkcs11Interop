@@ -16,7 +16,10 @@ namespace Net.Pkcs11Interop.Tests
             //test2._01_SignAndVerifySinglePartTest();
             Testing test1 = new Testing();
             test1._01_GenerateKeyTest();
+            //test1._02_GenerateKeyPairTest();
+            Console.WriteLine("Success. Press anything to exit.");
             Console.ReadLine();
+
             
         }
     }
@@ -100,7 +103,7 @@ namespace Net.Pkcs11Interop.Tests
                     privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_UNWRAP, true));
 
                     // Specify key generation mechanism
-                    Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS_KEY_PAIR_GEN);
+                    Mechanism mechanism = new Mechanism(CKM.CKM_GOSTR3410_KEY_PAIR_GEN);
 
                     // Generate key pair
                     ObjectHandle publicKeyHandle = null;

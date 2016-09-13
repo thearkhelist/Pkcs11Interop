@@ -10,3 +10,15 @@ F:\Pkcs11Interop-master\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\TestProj
 F:\Pkcs11Interop-master\src\Pkcs11Interop\ConsoleApplication1\obj\Debug\ConsoleApplication1.csprojResolveAssemblyReference.cache
 F:\Pkcs11Interop-master\src\Pkcs11Interop\ConsoleApplication1\obj\Debug\ConsoleApplication1.exe
 F:\Pkcs11Interop-master\src\Pkcs11Interop\ConsoleApplication1\obj\Debug\ConsoleApplication1.pdb
+C:\Users\VJ\Documents\GitHub\Pkcs11Interop\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\ConsoleApplication1.exe.config
+C:\Users\VJ\Documents\GitHub\Pkcs11Interop\src\Pkcs11Interop\ConsoleApplication1\obj\Debug\ConsoleApplication1.exe
+C:\Users\VJ\Documents\GitHub\Pkcs11Interop\src\Pkcs11Interop\ConsoleApplication1\obj\Debug\ConsoleApplication1.pdb
+C:\Users\VJ\Documents\GitHub\Pkcs11Interop\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\ConsoleApplication1.exe
+C:\Users\VJ\Documents\GitHub\Pkcs11Interop\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\ConsoleApplication1.pdb
+C:\Users\VJ\Documents\GitHub\Pkcs11Interop\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\Pkcs11Interop.dll
+C:\Users\VJ\Documents\GitHub\Pkcs11Interop\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\TestProject1.dll
+C:\Users\VJ\Documents\GitHub\Pkcs11Interop\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll
+C:\Users\VJ\Documents\GitHub\Pkcs11Interop\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\Pkcs11Interop.pdb
+C:\Users\VJ\Documents\GitHub\Pkcs11Interop\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\Pkcs11Interop.xml
+C:\Users\VJ\Documents\GitHub\Pkcs11Interop\src\Pkcs11Interop\ConsoleApplication1\bin\Debug\TestProject1.pdb
+C:\Users\VJ\Documents\GitHub\Pkcs11Interop\src\Pkcs11Interop\ConsoleApplication1\obj\Debug\ConsoleApplication1.csprojResolveAssemblyReference.cache

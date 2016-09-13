@@ -44,8 +44,10 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
             if (slots != null)
             if (slots.Count > 0) { }
 
-                // First slot with token present is OK...
-             Slot matchingSlot = slots[0];
+            // First slot with token present is OK...
+           
+                Slot matchingSlot = slots[0];
+            
 
             // ...unless there are matching criteria specified in Settings class
             if (Settings.TokenSerial != null || Settings.TokenLabel != null)
