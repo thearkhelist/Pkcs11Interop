@@ -15,7 +15,7 @@ namespace Net.Pkcs11Interop.Tests
             _20_SignAndVerifyTest test2 = new _20_SignAndVerifyTest();
             //test2._01_SignAndVerifySinglePartTest();
             Testing test1 = new Testing();
-            test1._02_GenerateKeyPairTest();
+            test1._01_GenerateKeyTest();
             Console.ReadLine();
             
         }
