@@ -182,7 +182,7 @@ namespace Net.Pkcs11Interop.Common
         CKK_ARIA = 0x00000026,
 
         /// <summary>
-        /// GOST28147 key
+        /// GOST 28147 key
         /// </summary>
         CKK_GOST28147 = 0x00000032,
 

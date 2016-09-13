@@ -9,7 +9,7 @@
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.к
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
@@ -23,7 +23,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Net.Pkcs11Interop.Common;
-using Net.Pkcs11Interop.LowLevelAPI41;
 
 namespace Net.Pkcs11Interop.HighLevelAPI
 {
@@ -49,58 +48,144 @@ namespace Net.Pkcs11Interop.HighLevelAPI
         }
 
         /// <summary>
-        /// Low level PKCS#11 wrapper
+        /// Platform specific Session
         /// </summary>
-        private LowLevelAPI41.Pkcs11 _p11 = null;
+        private HighLevelAPI40.Session _session40 = null;
 
         /// <summary>
-        /// Low level PKCS#11 wrapper. Use with caution!
+        /// Platform specific Session. Use with caution!
         /// </summary>
-        public LowLevelAPI41.Pkcs11 LowLevelPkcs11
+        public HighLevelAPI40.Session HLA40Session
         {
             get
             {
                 if (this._disposed)
                     throw new ObjectDisposedException(this.GetType().FullName);
 
-                return _p11;
+                return _session40;
             }
         }
 
         /// <summary>
-        /// PKCS#11 handle of session
+        /// Platform specific Session
         /// </summary>
-        private uint _sessionId = CK.CK_INVALID_HANDLE;
+        private HighLevelAPI41.Session _session41 = null;
 
         /// <summary>
-        /// PKCS#11 handle of session
+        /// Platform specific Session. Use with caution!
         /// </summary>
-        public uint SessionId
+        public HighLevelAPI41.Session HLA41Session
         {
             get
             {
                 if (this._disposed)
                     throw new ObjectDisposedException(this.GetType().FullName);
 
-                return _sessionId;
+                return _session41;
             }
         }
 
         /// <summary>
-        /// Initializes new instance of Session class
+        /// Platform specific Session
         /// </summary>
-        /// <param name="pkcs11">Low level PKCS#11 wrapper</param>
-        /// <param name="sessionId">PKCS#11 handle of session</param>
-        internal Session(LowLevelAPI41.Pkcs11 pkcs11, uint sessionId)
+        private HighLevelAPI80.Session _session80 = null;
+
+        /// <summary>
+        /// Platform specific Session. Use with caution!
+        /// </summary>
+        public HighLevelAPI80.Session HLA80Session
         {
-            if (pkcs11 == null)
-                throw new ArgumentNullException("pkcs11");
+            get
+            {
+                if (this._disposed)
+                    throw new ObjectDisposedException(this.GetType().FullName);
 
-            if (sessionId == CK.CK_INVALID_HANDLE)
-                throw new ArgumentException("Invalid handle specified", "sessionId");
+                return _session80;
+            }
+        }
 
-            _p11 = pkcs11;
-            _sessionId = sessionId;
+        /// <summary>
+        /// Platform specific Session
+        /// </summary>
+        private HighLevelAPI81.Session _session81 = null;
+
+        /// <summary>
+        /// Platform specific Session. Use with caution!
+        /// </summary>
+        public HighLevelAPI81.Session HLA81Session
+        {
+            get
+            {
+                if (this._disposed)
+                    throw new ObjectDisposedException(this.GetType().FullName);
+
+                return _session81;
+            }
+        }
+
+        /// <summary>
+        /// PKCS#11 handle of session
+        /// </summary>
+        public ulong SessionId
+        {
+            get
+            {
+                if (this._disposed)
+                    throw new ObjectDisposedException(this.GetType().FullName);
+
+                if (Platform.UnmanagedLongSize == 4)
+                    return (Platform.StructPackingSize == 0) ? _session40.SessionId : _session41.SessionId;
+                else
+                    return (Platform.StructPackingSize == 0) ? _session80.SessionId : _session81.SessionId;
+            }
+        }
+
+        /// <summary>
+        /// Converts platform specific Session to platfrom neutral Session
+        /// </summary>
+        /// <param name="session">Platform specific Session</param>
+        internal Session(HighLevelAPI40.Session session)
+        {
+            if (session == null)
+                throw new ArgumentNullException("session");
+
+            _session40 = session;
+        }
+
+        /// <summary>
+        /// Converts platform specific Session to platfrom neutral Session
+        /// </summary>
+        /// <param name="session">Platform specific Session</param>
+        internal Session(HighLevelAPI41.Session session)
+        {
+            if (session == null)
+                throw new ArgumentNullException("session");
+
+            _session41 = session;
+        }
+
+        /// <summary>
+        /// Converts platform specific Session to platfrom neutral Session
+        /// </summary>
+        /// <param name="session">Platform specific Session</param>
+        internal Session(HighLevelAPI80.Session session)
+        {
+            if (session == null)
+                throw new ArgumentNullException("session");
+
+            _session80 = session;
+        }
+
+        /// <summary>
+        /// Converts platform specific Session to platfrom neutral Session
+        /// </summary>
+        /// <param name="session">Platform specific Session</param>
+        internal Session(HighLevelAPI81.Session session)
+        {
+            if (session == null)
+                throw new ArgumentNullException("session");
+
+            _session81 = session;
         }
 
         /// <summary>
@@ -110,15 +195,21 @@ namespace Net.Pkcs11Interop.HighLevelAPI
         {
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
-            Console.Write("C_CloseSession: ");
-            CKR rv = _p11.C_CloseSession(_sessionId);
-            Console.WriteLine("-> {0}", rv);
-            if (rv != CKR.CKR_OK)
 
-          
-                throw new Pkcs11Exception("C_CloseSession", rv);
-    
-            _sessionId = CK.CK_INVALID_HANDLE;
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session40.CloseSession();
+                else
+                    _session41.CloseSession();
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session80.CloseSession();
+                else
+                    _session81.CloseSession();
+            }
         }
 
         /// <summary>
@@ -130,18 +221,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
 
-            byte[] pinValue = null;
-            uint pinValueLen = 0;
-            if (userPin != null)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                pinValue = ConvertUtils.Utf8StringToBytes(userPin);
-                pinValueLen = Convert.ToUInt32(pinValue.Length);
+                if (Platform.StructPackingSize == 0)
+                    _session40.InitPin(userPin);
+                else
+                    _session41.InitPin(userPin);
             }
-            Console.WriteLine("C_InitPIN: ");
-            CKR rv = _p11.C_InitPIN(_sessionId, pinValue, pinValueLen);
-            Console.WriteLine("-> {0}", rv);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_InitPIN", rv);
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session80.InitPin(userPin);
+                else
+                    _session81.InitPin(userPin);
+            }
         }
 
         /// <summary>
@@ -153,17 +246,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
 
-            byte[] pinValue = null;
-            uint pinValueLen = 0;
-            if (userPin != null)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                pinValue = userPin;
-                pinValueLen = Convert.ToUInt32(userPin.Length);
+                if (Platform.StructPackingSize == 0)
+                    _session40.InitPin(userPin);
+                else
+                    _session41.InitPin(userPin);
             }
-            
-            CKR rv = _p11.C_InitPIN(_sessionId, pinValue, pinValueLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_InitPIN", rv);
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session80.InitPin(userPin);
+                else
+                    _session81.InitPin(userPin);
+            }
         }
 
         /// <summary>
@@ -176,25 +272,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
 
-            byte[] oldPinValue = null;
-            uint oldPinValueLen = 0;
-            if (oldPin != null)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                oldPinValue = ConvertUtils.Utf8StringToBytes(oldPin);
-                oldPinValueLen = Convert.ToUInt32(oldPinValue.Length);
+                if (Platform.StructPackingSize == 0)
+                    _session40.SetPin(oldPin, newPin);
+                else
+                    _session41.SetPin(oldPin, newPin);
             }
-
-            byte[] newPinValue = null;
-            uint newPinValueLen = 0;
-            if (newPin != null)
+            else
             {
-                newPinValue = ConvertUtils.Utf8StringToBytes(newPin);
-                newPinValueLen = Convert.ToUInt32(newPinValue.Length);
+                if (Platform.StructPackingSize == 0)
+                    _session80.SetPin(oldPin, newPin);
+                else
+                    _session81.SetPin(oldPin, newPin);
             }
-
-            CKR rv = _p11.C_SetPIN(_sessionId, oldPinValue, oldPinValueLen, newPinValue, newPinValueLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_SetPIN", rv);
         }
 
         /// <summary>
@@ -207,25 +298,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
 
-            byte[] oldPinValue = null;
-            uint oldPinValueLen = 0;
-            if (oldPin != null)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                oldPinValue = oldPin;
-                oldPinValueLen = Convert.ToUInt32(oldPin.Length);
+                if (Platform.StructPackingSize == 0)
+                    _session40.SetPin(oldPin, newPin);
+                else
+                    _session41.SetPin(oldPin, newPin);
             }
-            
-            byte[] newPinValue = null;
-            uint newPinValueLen = 0;
-            if (newPin != null)
+            else
             {
-                newPinValue = newPin;
-                newPinValueLen = Convert.ToUInt32(newPin.Length);
+                if (Platform.StructPackingSize == 0)
+                    _session80.SetPin(oldPin, newPin);
+                else
+                    _session81.SetPin(oldPin, newPin);
             }
-            
-            CKR rv = _p11.C_SetPIN(_sessionId, oldPinValue, oldPinValueLen, newPinValue, newPinValueLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_SetPIN", rv);
         }
 
         /// <summary>
@@ -237,12 +323,10 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
 
-            CK_SESSION_INFO sessionInfo = new CK_SESSION_INFO();
-            CKR rv = _p11.C_GetSessionInfo(_sessionId, ref sessionInfo);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_GetSessionInfo", rv);
-
-            return new SessionInfo(_sessionId, sessionInfo);
+            if (Platform.UnmanagedLongSize == 4)
+                return (Platform.StructPackingSize == 0) ? new SessionInfo(_session40.GetSessionInfo()) : new SessionInfo(_session41.GetSessionInfo());
+            else
+                return (Platform.StructPackingSize == 0) ? new SessionInfo(_session80.GetSessionInfo()) : new SessionInfo(_session81.GetSessionInfo());
         }
 
         /// <summary>
@@ -254,17 +338,10 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
 
-            uint operationStateLen = 0;
-            CKR rv = _p11.C_GetOperationState(_sessionId, null, ref operationStateLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_GetOperationState", rv);
-
-            byte[] operationState = new byte[operationStateLen];
-            rv = _p11.C_GetOperationState(_sessionId, operationState, ref operationStateLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_GetOperationState", rv);
-
-            return operationState;
+            if (Platform.UnmanagedLongSize == 4)
+                return (Platform.StructPackingSize == 0) ? _session40.GetOperationState() : _session41.GetOperationState();
+            else
+                return (Platform.StructPackingSize == 0) ? _session80.GetOperationState() : _session81.GetOperationState();
         }
 
         /// <summary>
@@ -287,9 +364,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (authenticationKey == null)
                 throw new ArgumentNullException("authenticationKey");
 
-            CKR rv = _p11.C_SetOperationState(_sessionId, state, Convert.ToUInt32(state.Length), encryptionKey.ObjectId, authenticationKey.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_SetOperationState", rv);
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session40.SetOperationState(state, encryptionKey.ObjectHandle40, authenticationKey.ObjectHandle40);
+                else
+                    _session41.SetOperationState(state, encryptionKey.ObjectHandle41, authenticationKey.ObjectHandle41);
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session80.SetOperationState(state, encryptionKey.ObjectHandle80, authenticationKey.ObjectHandle80);
+                else
+                    _session81.SetOperationState(state, encryptionKey.ObjectHandle81, authenticationKey.ObjectHandle81);
+            }
         }
 
         /// <summary>
@@ -302,17 +390,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
 
-            byte[] pinValue = null;
-            uint pinValueLen = 0;
-            if (pin != null)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                pinValue = ConvertUtils.Utf8StringToBytes(pin);
-                pinValueLen = Convert.ToUInt32(pinValue.Length);
+                if (Platform.StructPackingSize == 0)
+                    _session40.Login(userType, pin);
+                else
+                    _session41.Login(userType, pin);
             }
-
-            CKR rv = _p11.C_Login(_sessionId, userType, pinValue, pinValueLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_Login", rv);
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session80.Login(userType, pin);
+                else
+                    _session81.Login(userType, pin);
+            }
         }
 
         /// <summary>
@@ -325,17 +416,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
 
-            byte[] pinValue = null;
-            uint pinValueLen = 0;
-            if (pin != null)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                pinValue = pin;
-                pinValueLen = Convert.ToUInt32(pin.Length);
+                if (Platform.StructPackingSize == 0)
+                    _session40.Login(userType, pin);
+                else
+                    _session41.Login(userType, pin);
             }
-            
-            CKR rv = _p11.C_Login(_sessionId, userType, pinValue, pinValueLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_Login", rv);
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session80.Login(userType, pin);
+                else
+                    _session81.Login(userType, pin);
+            }
         }
 
         /// <summary>
@@ -346,9 +440,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
 
-            CKR rv = _p11.C_Logout(_sessionId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_Logout", rv);
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session40.Logout();
+                else
+                    _session41.Logout();
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session80.Logout();
+                else
+                    _session81.Logout();
+            }
         }
 
         /// <summary>
@@ -361,24 +466,36 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
 
-            uint objectId = CK.CK_INVALID_HANDLE;
-
-            CK_ATTRIBUTE[] template = null;
-            uint templateLength = 0;
-            
-            if (attributes != null)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                templateLength = Convert.ToUInt32(attributes.Count);
-                template = new CK_ATTRIBUTE[templateLength];
-                for (int i = 0; i < templateLength; i++)
-                    template[i] = attributes[i].CkAttribute;
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI40.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI40List(attributes);
+                    HighLevelAPI40.ObjectHandle hlaObjectHandle = _session40.CreateObject(hlaAttributes);
+                    return new ObjectHandle(hlaObjectHandle);
+                }
+                else
+                {
+                    List<HighLevelAPI41.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI41List(attributes);
+                    HighLevelAPI41.ObjectHandle hlaObjectHandle = _session41.CreateObject(hlaAttributes);
+                    return new ObjectHandle(hlaObjectHandle);
+                }
             }
-
-            CKR rv = _p11.C_CreateObject(_sessionId, template, templateLength, ref objectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_CreateObject", rv);
-
-            return new ObjectHandle(objectId);
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI80.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI80List(attributes);
+                    HighLevelAPI80.ObjectHandle hlaObjectHandle = _session80.CreateObject(hlaAttributes);
+                    return new ObjectHandle(hlaObjectHandle);
+                }
+                else
+                {
+                    List<HighLevelAPI81.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI81List(attributes);
+                    HighLevelAPI81.ObjectHandle hlaObjectHandle = _session81.CreateObject(hlaAttributes);
+                    return new ObjectHandle(hlaObjectHandle);
+                }
+            }
         }
 
         /// <summary>
@@ -395,24 +512,36 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (objectHandle == null)
                 throw new ArgumentNullException("objectHandle");
 
-            uint objectId = CK.CK_INVALID_HANDLE;
-
-            CK_ATTRIBUTE[] template = null;
-            uint templateLength = 0;
-
-            if (attributes != null)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                templateLength = Convert.ToUInt32(attributes.Count);
-                template = new CK_ATTRIBUTE[templateLength];
-                for (int i = 0; i < templateLength; i++)
-                    template[i] = attributes[i].CkAttribute;
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI40.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI40List(attributes);
+                    HighLevelAPI40.ObjectHandle hlaObjectHandle = _session40.CopyObject(objectHandle.ObjectHandle40, hlaAttributes);
+                    return new ObjectHandle(hlaObjectHandle);
+                }
+                else
+                {
+                    List<HighLevelAPI41.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI41List(attributes);
+                    HighLevelAPI41.ObjectHandle hlaObjectHandle = _session41.CopyObject(objectHandle.ObjectHandle41, hlaAttributes);
+                    return new ObjectHandle(hlaObjectHandle);
+                }
             }
-
-            CKR rv = _p11.C_CopyObject(_sessionId, objectHandle.ObjectId, template, templateLength, ref objectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_CopyObject", rv);
-
-            return new ObjectHandle(objectId);
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI80.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI80List(attributes);
+                    HighLevelAPI80.ObjectHandle hlaObjectHandle = _session80.CopyObject(objectHandle.ObjectHandle80, hlaAttributes);
+                    return new ObjectHandle(hlaObjectHandle);
+                }
+                else
+                {
+                    List<HighLevelAPI81.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI81List(attributes);
+                    HighLevelAPI81.ObjectHandle hlaObjectHandle = _session81.CopyObject(objectHandle.ObjectHandle81, hlaAttributes);
+                    return new ObjectHandle(hlaObjectHandle);
+                }
+            }
         }
 
         /// <summary>
@@ -427,9 +556,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (objectHandle == null)
                 throw new ArgumentNullException("objectHandle");
 
-            CKR rv = _p11.C_DestroyObject(_sessionId, objectHandle.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DestroyObject", rv);
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session40.DestroyObject(objectHandle.ObjectHandle40);
+                else
+                    _session41.DestroyObject(objectHandle.ObjectHandle41);
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session80.DestroyObject(objectHandle.ObjectHandle80);
+                else
+                    _session81.DestroyObject(objectHandle.ObjectHandle81);
+            }
         }
 
         /// <summary>
@@ -437,7 +577,7 @@ namespace Net.Pkcs11Interop.HighLevelAPI
         /// </summary>
         /// <param name="objectHandle">Handle of object</param>
         /// <returns>Size of an object in bytes</returns>
-        public uint GetObjectSize(ObjectHandle objectHandle)
+        public ulong GetObjectSize(ObjectHandle objectHandle)
         {
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
@@ -445,12 +585,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (objectHandle == null)
                 throw new ArgumentNullException("objectHandle");
 
-            uint objectSize = 0;
-            CKR rv = _p11.C_GetObjectSize(_sessionId, objectHandle.ObjectId, ref objectSize);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_GetObjectSize", rv);
-
-            return objectSize;
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session40.GetObjectSize(objectHandle.ObjectHandle40);
+                else
+                    return _session41.GetObjectSize(objectHandle.ObjectHandle41);
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session80.GetObjectSize(objectHandle.ObjectHandle80);
+                else
+                    return _session81.GetObjectSize(objectHandle.ObjectHandle81);
+            }
         }
 
         /// <summary>
@@ -473,11 +621,11 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (attributes.Count < 1)
                 throw new ArgumentException("No attributes specified", "attributes");
 
-            List<uint> uintAttributes = new List<uint>();
+            List<ulong> ulongAttributes = new List<ulong>();
             foreach (CKA attribute in attributes)
-                uintAttributes.Add((uint)attribute);
+                ulongAttributes.Add(Convert.ToUInt64((uint)attribute));
 
-            return GetAttributeValue(objectHandle, uintAttributes);
+            return GetAttributeValue(objectHandle, ulongAttributes);
         }
 
         /// <summary>
@@ -486,7 +634,7 @@ namespace Net.Pkcs11Interop.HighLevelAPI
         /// <param name="objectHandle">Handle of object whose attributes should be read</param>
         /// <param name="attributes">List of attributes that should be read</param>
         /// <returns>Object attributes</returns>
-        public List<ObjectAttribute> GetAttributeValue(ObjectHandle objectHandle, List<uint> attributes)
+        public List<ObjectAttribute> GetAttributeValue(ObjectHandle objectHandle, List<ulong> attributes)
         {
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
@@ -500,39 +648,36 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (attributes.Count < 1)
                 throw new ArgumentException("No attributes specified", "attributes");
 
-            // Prepare array of CK_ATTRIBUTEs
-            CK_ATTRIBUTE[] template = new CK_ATTRIBUTE[attributes.Count];
-            for (int i = 0; i < attributes.Count; i++)
-                template[i] = CkaUtils.CreateAttribute(attributes[i]);
-
-            // Determine size of attribute values
-            CKR rv = _p11.C_GetAttributeValue(_sessionId, objectHandle.ObjectId, template, Convert.ToUInt32(template.Length));
-            if ((rv != CKR.CKR_OK) && (rv != CKR.CKR_ATTRIBUTE_SENSITIVE) && (rv != CKR.CKR_ATTRIBUTE_TYPE_INVALID))
-                throw new Pkcs11Exception("C_GetAttributeValue", rv);
-
-            // Allocate memory for each attribute
-            for (int i = 0; i < template.Length; i++)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                // PKCS#11 v2.20 page 133:
-                // If the specified attribute (i.e., the attribute specified by the type field) for the object
-                // cannot be revealed because the object is sensitive or unextractable, then the
-                // ulValueLen field in that triple is modified to hold the value -1 (i.e., when it is cast to a
-                // CK_LONG, it holds -1).
-                if ((int)template[i].valueLen != -1)
-                    template[i].value = Common.UnmanagedMemory.Allocate(Convert.ToInt32(template[i].valueLen));
+                List<uint> uintList = new List<uint>();
+                for (int i = 0; i < attributes.Count; i++)
+                    uintList.Add(Convert.ToUInt32(attributes[i]));
+
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI40.ObjectAttribute> hlaAttributes = _session40.GetAttributeValue(objectHandle.ObjectHandle40, uintList);
+                    return ObjectAttribute.ConvertFromHighLevelAPI40List(hlaAttributes);
+                }
+                else
+                {
+                    List<HighLevelAPI41.ObjectAttribute> hlaAttributes = _session41.GetAttributeValue(objectHandle.ObjectHandle41, uintList);
+                    return ObjectAttribute.ConvertFromHighLevelAPI41List(hlaAttributes);
+                }
             }
-
-            // Read values of attributes
-            rv = _p11.C_GetAttributeValue(_sessionId, objectHandle.ObjectId, template, Convert.ToUInt32(template.Length));
-            if ((rv != CKR.CKR_OK) && (rv != CKR.CKR_ATTRIBUTE_SENSITIVE) && (rv != CKR.CKR_ATTRIBUTE_TYPE_INVALID))
-                throw new Pkcs11Exception("C_GetAttributeValue", rv);
-
-            // Convert CK_ATTRIBUTEs to ObjectAttributes
-            List<ObjectAttribute> outAttributes = new List<ObjectAttribute>();
-            for (int i = 0; i < template.Length; i++)
-                outAttributes.Add(new ObjectAttribute(template[i]));
-
-            return outAttributes;
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI80.ObjectAttribute> hlaAttributes = _session80.GetAttributeValue(objectHandle.ObjectHandle80, attributes);
+                    return ObjectAttribute.ConvertFromHighLevelAPI80List(hlaAttributes);
+                }
+                else
+                {
+                    List<HighLevelAPI81.ObjectAttribute> hlaAttributes = _session81.GetAttributeValue(objectHandle.ObjectHandle81, attributes);
+                    return ObjectAttribute.ConvertFromHighLevelAPI81List(hlaAttributes);
+                }
+            }
         }
 
         /// <summary>
@@ -554,13 +699,32 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (attributes.Count < 1)
                 throw new ArgumentException("No attributes specified", "attributes");
 
-            CK_ATTRIBUTE[] template = new CK_ATTRIBUTE[attributes.Count];
-            for (int i = 0; i < attributes.Count; i++)
-                template[i] = attributes[i].CkAttribute;
-
-            CKR rv = _p11.C_SetAttributeValue(_sessionId, objectHandle.ObjectId, template, Convert.ToUInt32(template.Length));
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_SetAttributeValue", rv);
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI40.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI40List(attributes);
+                    _session40.SetAttributeValue(objectHandle.ObjectHandle40, hlaAttributes);
+                }
+                else
+                {
+                    List<HighLevelAPI41.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI41List(attributes);
+                    _session41.SetAttributeValue(objectHandle.ObjectHandle41, hlaAttributes);
+                }
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI80.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI80List(attributes);
+                    _session80.SetAttributeValue(objectHandle.ObjectHandle80, hlaAttributes);
+                }
+                else
+                {
+                    List<HighLevelAPI81.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI81List(attributes);
+                    _session81.SetAttributeValue(objectHandle.ObjectHandle81, hlaAttributes);
+                }
+            }
         }
 
         /// <summary>
@@ -572,20 +736,32 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
 
-            CK_ATTRIBUTE[] template = null;
-            uint templateLength = 0;
-            
-            if (attributes != null)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                templateLength = Convert.ToUInt32(attributes.Count);
-                template = new CK_ATTRIBUTE[templateLength];
-                for (int i = 0; i < templateLength; i++)
-                    template[i] = attributes[i].CkAttribute;
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI40.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI40List(attributes);
+                    _session40.FindObjectsInit(hlaAttributes);
+                }
+                else
+                {
+                    List<HighLevelAPI41.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI41List(attributes);
+                    _session41.FindObjectsInit(hlaAttributes);
+                }
             }
-
-            CKR rv = _p11.C_FindObjectsInit(_sessionId, template, templateLength);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_FindObjectsInit", rv);
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI80.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI80List(attributes);
+                    _session80.FindObjectsInit(hlaAttributes);
+                }
+                else
+                {
+                    List<HighLevelAPI81.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI81List(attributes);
+                    _session81.FindObjectsInit(hlaAttributes);
+                }
+            }
         }
 
         /// <summary>
@@ -598,18 +774,32 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
 
-            List<ObjectHandle> foundObjects = new List<ObjectHandle>();
-
-            uint[] objects = new uint[objectCount];
-            uint foundObjectsCount = 0;
-            CKR rv = _p11.C_FindObjects(_sessionId, objects, Convert.ToUInt32(objectCount), ref foundObjectsCount);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_FindObjects", rv);
-
-            for (int i = 0; i < foundObjectsCount; i++)
-                foundObjects.Add(new ObjectHandle(objects[i]));
-
-            return foundObjects;
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI40.ObjectHandle> hlaObjectHandles = _session40.FindObjects(objectCount);
+                    return ObjectHandle.ConvertFromHighLevelAPI40List(hlaObjectHandles);
+                }
+                else
+                {
+                    List<HighLevelAPI41.ObjectHandle> hlaObjectHandles = _session41.FindObjects(objectCount);
+                    return ObjectHandle.ConvertFromHighLevelAPI41List(hlaObjectHandles);
+                }
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI80.ObjectHandle> hlaObjectHandles = _session80.FindObjects(objectCount);
+                    return ObjectHandle.ConvertFromHighLevelAPI80List(hlaObjectHandles);
+                }
+                else
+                {
+                    List<HighLevelAPI81.ObjectHandle> hlaObjectHandles = _session81.FindObjects(objectCount);
+                    return ObjectHandle.ConvertFromHighLevelAPI81List(hlaObjectHandles);
+                }
+            }
         }
 
         /// <summary>
@@ -620,9 +810,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
 
-            CKR rv = _p11.C_FindObjectsFinal(_sessionId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_FindObjectsFinal", rv);
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session40.FindObjectsFinal();
+                else
+                    _session41.FindObjectsFinal();
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session80.FindObjectsFinal();
+                else
+                    _session81.FindObjectsFinal();
+            }
         }
 
         /// <summary>
@@ -635,41 +836,36 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
 
-            List<ObjectHandle> foundObjects = new List<ObjectHandle>();
-
-            CK_ATTRIBUTE[] template = null;
-            uint templateLength = 0;
-            
-            if (attributes != null)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                templateLength = Convert.ToUInt32(attributes.Count);
-                template = new CK_ATTRIBUTE[templateLength];
-                for (int i = 0; i < templateLength; i++)
-                    template[i] = attributes[i].CkAttribute;
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI40.ObjectAttribute> hlaObjectAttributes = ObjectAttribute.ConvertToHighLevelAPI40List(attributes);
+                    List<HighLevelAPI40.ObjectHandle> hlaObjectHandles = _session40.FindAllObjects(hlaObjectAttributes);
+                    return ObjectHandle.ConvertFromHighLevelAPI40List(hlaObjectHandles);
+                }
+                else
+                {
+                    List<HighLevelAPI41.ObjectAttribute> hlaObjectAttributes = ObjectAttribute.ConvertToHighLevelAPI41List(attributes);
+                    List<HighLevelAPI41.ObjectHandle> hlaObjectHandles = _session41.FindAllObjects(hlaObjectAttributes);
+                    return ObjectHandle.ConvertFromHighLevelAPI41List(hlaObjectHandles);
+                }
             }
-
-            CKR rv = _p11.C_FindObjectsInit(_sessionId, template, templateLength);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_FindObjectsInit", rv);
-
-            uint objectsLength = 256;
-            uint[] objects = new uint[objectsLength];
-            uint objectCount = objectsLength;
-            while (objectCount == objectsLength)
+            else
             {
-                rv = _p11.C_FindObjects(_sessionId, objects, objectsLength, ref objectCount);
-                if (rv != CKR.CKR_OK)
-                    throw new Pkcs11Exception("C_FindObjects", rv);
-
-                for (int i = 0; i < objectCount; i++)
-                    foundObjects.Add(new ObjectHandle(objects[i]));
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI80.ObjectAttribute> hlaObjectAttributes = ObjectAttribute.ConvertToHighLevelAPI80List(attributes);
+                    List<HighLevelAPI80.ObjectHandle> hlaObjectHandles = _session80.FindAllObjects(hlaObjectAttributes);
+                    return ObjectHandle.ConvertFromHighLevelAPI80List(hlaObjectHandles);
+                }
+                else
+                {
+                    List<HighLevelAPI81.ObjectAttribute> hlaObjectAttributes = ObjectAttribute.ConvertToHighLevelAPI81List(attributes);
+                    List<HighLevelAPI81.ObjectHandle> hlaObjectHandles = _session81.FindAllObjects(hlaObjectAttributes);
+                    return ObjectHandle.ConvertFromHighLevelAPI81List(hlaObjectHandles);
+                }
             }
-
-            rv = _p11.C_FindObjectsFinal(_sessionId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_FindObjectsFinal", rv);
-
-            return foundObjects;
         }
 
         /// <summary>
@@ -693,26 +889,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (data == null)
                 throw new ArgumentNullException("data");
 
-            CK_MECHANISM ckMechanism = mechanism.CkMechanism;
-
-            CKR rv = _p11.C_EncryptInit(_sessionId, ref ckMechanism, keyHandle.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_EncryptInit", rv);
-
-            uint encryptedDataLen = 0;
-            rv = _p11.C_Encrypt(_sessionId, data, Convert.ToUInt32(data.Length), null, ref encryptedDataLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_Encrypt", rv);
-
-            byte[] encryptedData = new byte[encryptedDataLen];
-            rv = _p11.C_Encrypt(_sessionId, data, Convert.ToUInt32(data.Length), encryptedData, ref encryptedDataLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_Encrypt", rv);
-
-            if (encryptedData.Length != encryptedDataLen)
-                Array.Resize(ref encryptedData, Convert.ToInt32(encryptedDataLen));
-
-            return encryptedData;
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session40.Encrypt(mechanism.Mechanism40, keyHandle.ObjectHandle40, data);
+                else
+                    return _session41.Encrypt(mechanism.Mechanism41, keyHandle.ObjectHandle41, data);
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session80.Encrypt(mechanism.Mechanism80, keyHandle.ObjectHandle80, data);
+                else
+                    return _session81.Encrypt(mechanism.Mechanism81, keyHandle.ObjectHandle81, data);
+            }
         }
 
         /// <summary>
@@ -770,40 +960,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (bufferLength < 1)
                 throw new ArgumentException("Value has to be positive number", "bufferLength");
 
-            CK_MECHANISM ckMechanism = mechanism.CkMechanism;
-
-            CKR rv = _p11.C_EncryptInit(_sessionId, ref ckMechanism, keyHandle.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_EncryptInit", rv);
-
-            byte[] part = new byte[bufferLength];
-            byte[] encryptedPart = new byte[bufferLength];
-            uint encryptedPartLen = Convert.ToUInt32(encryptedPart.Length);
-            
-            int bytesRead = 0;
-            while ((bytesRead = inputStream.Read(part, 0, part.Length)) > 0)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                encryptedPartLen = Convert.ToUInt32(encryptedPart.Length);
-                rv = _p11.C_EncryptUpdate(_sessionId, part, Convert.ToUInt32(bytesRead), encryptedPart, ref encryptedPartLen);
-                if (rv != CKR.CKR_OK)
-                    throw new Pkcs11Exception("C_EncryptUpdate", rv);
-
-                outputStream.Write(encryptedPart, 0, Convert.ToInt32(encryptedPartLen));
+                if (Platform.StructPackingSize == 0)
+                    _session40.Encrypt(mechanism.Mechanism40, keyHandle.ObjectHandle40, inputStream, outputStream, bufferLength);
+                else
+                    _session41.Encrypt(mechanism.Mechanism41, keyHandle.ObjectHandle41, inputStream, outputStream, bufferLength);
             }
-
-            byte[] lastEncryptedPart = null;
-            uint lastEncryptedPartLen = 0;
-            rv = _p11.C_EncryptFinal(_sessionId, null, ref lastEncryptedPartLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_EncryptFinal", rv);
-
-            lastEncryptedPart = new byte[lastEncryptedPartLen];
-            rv = _p11.C_EncryptFinal(_sessionId, lastEncryptedPart, ref lastEncryptedPartLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_EncryptFinal", rv);
-
-            if (lastEncryptedPartLen > 0)
-                outputStream.Write(lastEncryptedPart, 0, Convert.ToInt32(lastEncryptedPartLen));
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session80.Encrypt(mechanism.Mechanism80, keyHandle.ObjectHandle80, inputStream, outputStream, bufferLength);
+                else
+                    _session81.Encrypt(mechanism.Mechanism81, keyHandle.ObjectHandle81, inputStream, outputStream, bufferLength);
+            }
         }
 
         /// <summary>
@@ -827,26 +997,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (encryptedData == null)
                 throw new ArgumentNullException("encryptedData");
 
-            CK_MECHANISM ckMechanism = mechanism.CkMechanism;
-
-            CKR rv = _p11.C_DecryptInit(_sessionId, ref ckMechanism, keyHandle.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DecryptInit", rv);
-
-            uint decryptedDataLen = 0;
-            rv = _p11.C_Decrypt(_sessionId, encryptedData, Convert.ToUInt32(encryptedData.Length), null, ref decryptedDataLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_Decrypt", rv);
-
-            byte[] decryptedData = new byte[decryptedDataLen];
-            rv = _p11.C_Decrypt(_sessionId, encryptedData, Convert.ToUInt32(encryptedData.Length), decryptedData, ref decryptedDataLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_Decrypt", rv);
-
-            if (decryptedData.Length != decryptedDataLen)
-                Array.Resize(ref decryptedData, Convert.ToInt32(decryptedDataLen));
-
-            return decryptedData;
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session40.Decrypt(mechanism.Mechanism40, keyHandle.ObjectHandle40, encryptedData);
+                else
+                    return _session41.Decrypt(mechanism.Mechanism41, keyHandle.ObjectHandle41, encryptedData);
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session80.Decrypt(mechanism.Mechanism80, keyHandle.ObjectHandle80, encryptedData);
+                else
+                    return _session81.Decrypt(mechanism.Mechanism81, keyHandle.ObjectHandle81, encryptedData);
+            }
         }
 
         /// <summary>
@@ -904,40 +1068,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (bufferLength < 1)
                 throw new ArgumentException("Value has to be positive number", "bufferLength");
 
-            CK_MECHANISM ckMechanism = mechanism.CkMechanism;
-
-            CKR rv = _p11.C_DecryptInit(_sessionId, ref ckMechanism, keyHandle.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DecryptInit", rv);
-
-            byte[] encryptedPart = new byte[bufferLength];
-            byte[] part = new byte[bufferLength];
-            uint partLen = Convert.ToUInt32(part.Length);
-
-            int bytesRead = 0;
-            while ((bytesRead = inputStream.Read(encryptedPart, 0, encryptedPart.Length)) > 0)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                partLen = Convert.ToUInt32(part.Length);
-                rv = _p11.C_DecryptUpdate(_sessionId, encryptedPart, Convert.ToUInt32(bytesRead), part, ref partLen);
-                if (rv != CKR.CKR_OK)
-                    throw new Pkcs11Exception("C_DecryptUpdate", rv);
-
-                outputStream.Write(part, 0, Convert.ToInt32(partLen));
+                if (Platform.StructPackingSize == 0)
+                    _session40.Decrypt(mechanism.Mechanism40, keyHandle.ObjectHandle40, inputStream, outputStream, bufferLength);
+                else
+                    _session41.Decrypt(mechanism.Mechanism41, keyHandle.ObjectHandle41, inputStream, outputStream, bufferLength);
             }
-
-            byte[] lastPart = null;
-            uint lastPartLen = 0;
-            rv = _p11.C_DecryptFinal(_sessionId, null, ref lastPartLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DecryptFinal", rv);
-
-            lastPart = new byte[lastPartLen];
-            rv = _p11.C_DecryptFinal(_sessionId, lastPart, ref lastPartLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DecryptFinal", rv);
-
-            if (lastPartLen > 0)
-                outputStream.Write(lastPart, 0, Convert.ToInt32(lastPartLen));
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session80.Decrypt(mechanism.Mechanism80, keyHandle.ObjectHandle80, inputStream, outputStream, bufferLength);
+                else
+                    _session81.Decrypt(mechanism.Mechanism81, keyHandle.ObjectHandle81, inputStream, outputStream, bufferLength);
+            }
         }
 
         /// <summary>
@@ -957,30 +1101,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (keyHandle == null)
                 throw new ArgumentNullException("keyHandle");
 
-            CK_MECHANISM ckMechanism = mechanism.CkMechanism;
-            
-            CKR rv = _p11.C_DigestInit(_sessionId, ref ckMechanism);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DigestInit", rv);
-            
-            rv = _p11.C_DigestKey(_sessionId, keyHandle.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DigestKey", rv);
-            
-            uint digestLen = 0;
-            rv = _p11.C_DigestFinal(_sessionId, null, ref digestLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DigestFinal", rv);
-            
-            byte[] digest = new byte[digestLen];
-            rv = _p11.C_DigestFinal(_sessionId, digest, ref digestLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DigestFinal", rv);
-
-            if (digest.Length != digestLen)
-                Array.Resize(ref digest, Convert.ToInt32(digestLen));
-
-            return digest;
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session40.DigestKey(mechanism.Mechanism40, keyHandle.ObjectHandle40);
+                else
+                    return _session41.DigestKey(mechanism.Mechanism41, keyHandle.ObjectHandle41);
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session80.DigestKey(mechanism.Mechanism80, keyHandle.ObjectHandle80);
+                else
+                    return _session81.DigestKey(mechanism.Mechanism81, keyHandle.ObjectHandle81);
+            }
         }
 
         /// <summary>
@@ -1000,26 +1134,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (data == null)
                 throw new ArgumentNullException("data");
 
-            CK_MECHANISM ckMechanism = mechanism.CkMechanism;
-
-            CKR rv = _p11.C_DigestInit(_sessionId, ref ckMechanism);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DigestInit", rv);
-
-            uint digestLen = 0;
-            rv = _p11.C_Digest(_sessionId, data, Convert.ToUInt32(data.Length), null, ref digestLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_Digest", rv);
-
-            byte[] digest = new byte[digestLen];
-            rv = _p11.C_Digest(_sessionId, data, Convert.ToUInt32(data.Length), digest, ref digestLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_Digest", rv);
-
-            if (digest.Length != digestLen)
-                Array.Resize(ref digest, Convert.ToInt32(digestLen));
-
-            return digest;
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session40.Digest(mechanism.Mechanism40, data);
+                else
+                    return _session41.Digest(mechanism.Mechanism41, data);
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session80.Digest(mechanism.Mechanism80, data);
+                else
+                    return _session81.Digest(mechanism.Mechanism81, data);
+            }
         }
 
         /// <summary>
@@ -1063,36 +1191,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (bufferLength < 1)
                 throw new ArgumentException("Value has to be positive number", "bufferLength");
 
-            CK_MECHANISM ckMechanism = mechanism.CkMechanism;
-
-            CKR rv = _p11.C_DigestInit(_sessionId, ref ckMechanism);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DigestInit", rv);
-
-            byte[] part = new byte[bufferLength];
-            int bytesRead = 0;
-
-            while ((bytesRead = inputStream.Read(part, 0, part.Length)) > 0)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                rv = _p11.C_DigestUpdate(_sessionId, part, Convert.ToUInt32(bytesRead));
-                if (rv != CKR.CKR_OK)
-                    throw new Pkcs11Exception("C_DigestUpdate", rv);
+                if (Platform.StructPackingSize == 0)
+                    return _session40.Digest(mechanism.Mechanism40, inputStream, bufferLength);
+                else
+                    return _session41.Digest(mechanism.Mechanism41, inputStream, bufferLength);
             }
-
-            uint digestLen = 0;
-            rv = _p11.C_DigestFinal(_sessionId, null, ref digestLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DigestFinal", rv);
-
-            byte[] digest = new byte[digestLen];
-            rv = _p11.C_DigestFinal(_sessionId, digest, ref digestLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DigestFinal", rv);
-
-            if (digest.Length != digestLen)
-                Array.Resize(ref digest, Convert.ToInt32(digestLen));
-
-            return digest;
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session80.Digest(mechanism.Mechanism80, inputStream, bufferLength);
+                else
+                    return _session81.Digest(mechanism.Mechanism81, inputStream, bufferLength);
+            }
         }
 
         /// <summary>
@@ -1116,26 +1228,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (data == null)
                 throw new ArgumentNullException("data");
 
-            CK_MECHANISM ckMechanism = mechanism.CkMechanism;
-
-            CKR rv = _p11.C_SignInit(_sessionId, ref ckMechanism, keyHandle.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_SignInit", rv);
-
-            uint signatureLen = 0;
-            rv = _p11.C_Sign(_sessionId, data, Convert.ToUInt32(data.Length), null, ref signatureLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_Sign", rv);
-
-            byte[] signature = new byte[signatureLen];
-            rv = _p11.C_Sign(_sessionId, data, Convert.ToUInt32(data.Length), signature, ref signatureLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_Sign", rv);
-
-            if (signature.Length != signatureLen)
-                Array.Resize(ref signature, Convert.ToInt32(signatureLen));
-
-            return signature;
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session40.Sign(mechanism.Mechanism40, keyHandle.ObjectHandle40, data);
+                else
+                    return _session41.Sign(mechanism.Mechanism41, keyHandle.ObjectHandle41, data);
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session80.Sign(mechanism.Mechanism80, keyHandle.ObjectHandle80, data);
+                else
+                    return _session81.Sign(mechanism.Mechanism81, keyHandle.ObjectHandle81, data);
+            }
         }
 
         /// <summary>
@@ -1187,36 +1293,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (bufferLength < 1)
                 throw new ArgumentException("Value has to be positive number", "bufferLength");
 
-            CK_MECHANISM ckMechanism = mechanism.CkMechanism;
-
-            CKR rv = _p11.C_SignInit(_sessionId, ref ckMechanism, keyHandle.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_SignInit", rv);
-
-            byte[] part = new byte[bufferLength];
-            int bytesRead = 0;
-
-            while ((bytesRead = inputStream.Read(part, 0, part.Length)) > 0)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                rv = _p11.C_SignUpdate(_sessionId, part, Convert.ToUInt32(bytesRead));
-                if (rv != CKR.CKR_OK)
-                    throw new Pkcs11Exception("C_SignUpdate", rv);
+                if (Platform.StructPackingSize == 0)
+                    return _session40.Sign(mechanism.Mechanism40, keyHandle.ObjectHandle40, inputStream, bufferLength);
+                else
+                    return _session41.Sign(mechanism.Mechanism41, keyHandle.ObjectHandle41, inputStream, bufferLength);
             }
-
-            uint signatureLen = 0;
-            rv = _p11.C_SignFinal(_sessionId, null, ref signatureLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_SignFinal", rv);
-
-            byte[] signature = new byte[signatureLen];
-            rv = _p11.C_SignFinal(_sessionId, signature, ref signatureLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_SignFinal", rv);
-
-            if (signature.Length != signatureLen)
-                Array.Resize(ref signature, Convert.ToInt32(signatureLen));
-
-            return signature;
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session80.Sign(mechanism.Mechanism80, keyHandle.ObjectHandle80, inputStream, bufferLength);
+                else
+                    return _session81.Sign(mechanism.Mechanism81, keyHandle.ObjectHandle81, inputStream, bufferLength);
+            }
         }
 
         /// <summary>
@@ -1240,26 +1330,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (data == null)
                 throw new ArgumentNullException("data");
 
-            CK_MECHANISM ckMechanism = mechanism.CkMechanism;
-
-            CKR rv = _p11.C_SignRecoverInit(_sessionId, ref ckMechanism, keyHandle.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_SignRecoverInit", rv);
-
-            uint signatureLen = 0;
-            rv = _p11.C_SignRecover(_sessionId, data, Convert.ToUInt32(data.Length), null, ref signatureLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_SignRecover", rv);
-
-            byte[] signature = new byte[signatureLen];
-            rv = _p11.C_SignRecover(_sessionId, data, Convert.ToUInt32(data.Length), signature, ref signatureLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_SignRecover", rv);
-
-            if (signature.Length != signatureLen)
-                Array.Resize(ref signature, Convert.ToInt32(signatureLen));
-
-            return signature;
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session40.SignRecover(mechanism.Mechanism40, keyHandle.ObjectHandle40, data);
+                else
+                    return _session41.SignRecover(mechanism.Mechanism41, keyHandle.ObjectHandle41, data);
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session80.SignRecover(mechanism.Mechanism80, keyHandle.ObjectHandle80, data);
+                else
+                    return _session81.SignRecover(mechanism.Mechanism81, keyHandle.ObjectHandle81, data);
+            }
         }
 
         /// <summary>
@@ -1287,19 +1371,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (signature == null)
                 throw new ArgumentNullException("signature");
 
-            CK_MECHANISM ckMechanism = mechanism.CkMechanism;
-
-            CKR rv = _p11.C_VerifyInit(_sessionId, ref ckMechanism, keyHandle.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_VerifyInit", rv);
-
-            rv = _p11.C_Verify(_sessionId, data, Convert.ToUInt32(data.Length), signature, Convert.ToUInt32(signature.Length));
-            if (rv == CKR.CKR_OK)
-                isValid = true;
-            else if (rv == CKR.CKR_SIGNATURE_INVALID)
-                isValid = false;
-            else 
-                throw new Pkcs11Exception("C_Verify", rv);
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session40.Verify(mechanism.Mechanism40, keyHandle.ObjectHandle40, data, signature, out isValid);
+                else
+                    _session41.Verify(mechanism.Mechanism41, keyHandle.ObjectHandle41, data, signature, out isValid);
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session80.Verify(mechanism.Mechanism80, keyHandle.ObjectHandle80, data, signature, out isValid);
+                else
+                    _session81.Verify(mechanism.Mechanism81, keyHandle.ObjectHandle81, data, signature, out isValid);
+            }
         }
 
         /// <summary>
@@ -1359,29 +1444,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (bufferLength < 1)
                 throw new ArgumentException("Value has to be positive number", "bufferLength");
 
-            CK_MECHANISM ckMechanism = mechanism.CkMechanism;
-
-            CKR rv = _p11.C_VerifyInit(_sessionId, ref ckMechanism, keyHandle.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_VerifyInit", rv);
-
-            byte[] part = new byte[bufferLength];
-            int bytesRead = 0;
-
-            while ((bytesRead = inputStream.Read(part, 0, part.Length)) > 0)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                rv = _p11.C_VerifyUpdate(_sessionId, part, Convert.ToUInt32(bytesRead));
-                if (rv != CKR.CKR_OK)
-                    throw new Pkcs11Exception("C_VerifyUpdate", rv);
+                if (Platform.StructPackingSize == 0)
+                    _session40.Verify(mechanism.Mechanism40, keyHandle.ObjectHandle40, inputStream, signature, out isValid, bufferLength);
+                else
+                    _session41.Verify(mechanism.Mechanism41, keyHandle.ObjectHandle41, inputStream, signature, out isValid, bufferLength);
             }
-
-            rv = _p11.C_VerifyFinal(_sessionId, signature, Convert.ToUInt32(signature.Length));
-            if (rv == CKR.CKR_OK)
-                isValid = true;
-            else if (rv == CKR.CKR_SIGNATURE_INVALID)
-                isValid = false;
-            else 
-                throw new Pkcs11Exception("C_VerifyFinal", rv);
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session80.Verify(mechanism.Mechanism80, keyHandle.ObjectHandle80, inputStream, signature, out isValid, bufferLength);
+                else
+                    _session81.Verify(mechanism.Mechanism81, keyHandle.ObjectHandle81, inputStream, signature, out isValid, bufferLength);
+            }
         }
 
         /// <summary>
@@ -1405,31 +1481,21 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             
             if (signature == null)
                 throw new ArgumentNullException("signature");
-            
-            CK_MECHANISM ckMechanism = mechanism.CkMechanism;
 
-            CKR rv = _p11.C_VerifyRecoverInit(_sessionId, ref ckMechanism, keyHandle.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_VerifyRecoverInit", rv);
-
-            uint dataLen = 0;
-            rv = _p11.C_VerifyRecover(_sessionId, signature, Convert.ToUInt32(signature.Length), null, ref dataLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_VerifyRecover", rv);
-
-            byte[] data = new byte[dataLen];
-            rv = _p11.C_VerifyRecover(_sessionId, signature, Convert.ToUInt32(signature.Length), data, ref dataLen);
-            if (rv == CKR.CKR_OK)
-                isValid = true;
-            else if (rv == CKR.CKR_SIGNATURE_INVALID)
-                isValid = false;
-            else 
-                throw new Pkcs11Exception("C_VerifyRecover", rv);
-
-            if (data.Length != dataLen)
-                Array.Resize(ref data, Convert.ToInt32(dataLen));
-
-            return data;
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session40.VerifyRecover(mechanism.Mechanism40, keyHandle.ObjectHandle40, signature, out isValid);
+                else
+                    return _session41.VerifyRecover(mechanism.Mechanism41, keyHandle.ObjectHandle41, signature, out isValid);
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session80.VerifyRecover(mechanism.Mechanism80, keyHandle.ObjectHandle80, signature, out isValid);
+                else
+                    return _session81.VerifyRecover(mechanism.Mechanism81, keyHandle.ObjectHandle81, signature, out isValid);
+            }
         }
 
         /// <summary>
@@ -1530,61 +1596,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (bufferLength < 1)
                 throw new ArgumentException("Value has to be positive number", "bufferLength");
 
-            CK_MECHANISM ckDigestingMechanism = digestingMechanism.CkMechanism;
-
-            CKR rv = _p11.C_DigestInit(_sessionId, ref ckDigestingMechanism);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DigestInit", rv);
-
-            CK_MECHANISM ckEncryptionMechanism = encryptionMechanism.CkMechanism;
-
-            rv = _p11.C_EncryptInit(_sessionId, ref ckEncryptionMechanism, keyHandle.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_EncryptInit", rv);
-
-            byte[] part = new byte[bufferLength];
-            byte[] encryptedPart = new byte[bufferLength];
-            uint encryptedPartLen = Convert.ToUInt32(encryptedPart.Length);
-
-            int bytesRead = 0;
-            while ((bytesRead = inputStream.Read(part, 0, part.Length)) > 0)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                encryptedPartLen = Convert.ToUInt32(encryptedPart.Length);
-                rv = _p11.C_DigestEncryptUpdate(_sessionId, part, Convert.ToUInt32(bytesRead), encryptedPart, ref encryptedPartLen);
-                if (rv != CKR.CKR_OK)
-                    throw new Pkcs11Exception("C_DigestEncryptUpdate", rv);
-
-                outputStream.Write(encryptedPart, 0, Convert.ToInt32(encryptedPartLen));
+                if (Platform.StructPackingSize == 0)
+                    return _session40.DigestEncrypt(digestingMechanism.Mechanism40, encryptionMechanism.Mechanism40, keyHandle.ObjectHandle40, inputStream, outputStream, bufferLength);
+                else
+                    return _session41.DigestEncrypt(digestingMechanism.Mechanism41, encryptionMechanism.Mechanism41, keyHandle.ObjectHandle41, inputStream, outputStream, bufferLength);
             }
-
-            byte[] lastEncryptedPart = null;
-            uint lastEncryptedPartLen = 0;
-            rv = _p11.C_EncryptFinal(_sessionId, null, ref lastEncryptedPartLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_EncryptFinal", rv);
-
-            lastEncryptedPart = new byte[lastEncryptedPartLen];
-            rv = _p11.C_EncryptFinal(_sessionId, lastEncryptedPart, ref lastEncryptedPartLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_EncryptFinal", rv);
-
-            if (lastEncryptedPartLen > 0)
-                outputStream.Write(lastEncryptedPart, 0, Convert.ToInt32(lastEncryptedPartLen));
-
-            uint digestLen = 0;
-            rv = _p11.C_DigestFinal(_sessionId, null, ref digestLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DigestFinal", rv);
-
-            byte[] digest = new byte[digestLen];
-            rv = _p11.C_DigestFinal(_sessionId, digest, ref digestLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DigestFinal", rv);
-
-            if (digest.Length != digestLen)
-                Array.Resize(ref digest, Convert.ToInt32(digestLen));
-
-            return digest;
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session80.DigestEncrypt(digestingMechanism.Mechanism80, encryptionMechanism.Mechanism80, keyHandle.ObjectHandle80, inputStream, outputStream, bufferLength);
+                else
+                    return _session81.DigestEncrypt(digestingMechanism.Mechanism81, encryptionMechanism.Mechanism81, keyHandle.ObjectHandle81, inputStream, outputStream, bufferLength);
+            }
         }
 
         /// <summary>
@@ -1685,61 +1710,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (bufferLength < 1)
                 throw new ArgumentException("Value has to be positive number", "bufferLength");
 
-            CK_MECHANISM ckDigestingMechanism = digestingMechanism.CkMechanism;
-
-            CKR rv = _p11.C_DigestInit(_sessionId, ref ckDigestingMechanism);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DigestInit", rv);
-
-            CK_MECHANISM ckDecryptionMechanism = decryptionMechanism.CkMechanism;
-
-            rv = _p11.C_DecryptInit(_sessionId, ref ckDecryptionMechanism, keyHandle.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DecryptInit", rv);
-
-            byte[] encryptedPart = new byte[bufferLength];
-            byte[] part = new byte[bufferLength];
-            uint partLen = Convert.ToUInt32(part.Length);
-
-            int bytesRead = 0;
-            while ((bytesRead = inputStream.Read(encryptedPart, 0, encryptedPart.Length)) > 0)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                partLen = Convert.ToUInt32(part.Length);
-                rv = _p11.C_DecryptDigestUpdate(_sessionId, encryptedPart, Convert.ToUInt32(bytesRead), part, ref partLen);
-                if (rv != CKR.CKR_OK)
-                    throw new Pkcs11Exception("C_DecryptDigestUpdate", rv);
-
-                outputStream.Write(part, 0, Convert.ToInt32(partLen));
+                if (Platform.StructPackingSize == 0)
+                    return _session40.DecryptDigest(digestingMechanism.Mechanism40, decryptionMechanism.Mechanism40, keyHandle.ObjectHandle40, inputStream, outputStream, bufferLength);
+                else
+                    return _session41.DecryptDigest(digestingMechanism.Mechanism41, decryptionMechanism.Mechanism41, keyHandle.ObjectHandle41, inputStream, outputStream, bufferLength);
             }
-
-            byte[] lastPart = null;
-            uint lastPartLen = 0;
-            rv = _p11.C_DecryptFinal(_sessionId, null, ref lastPartLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DecryptFinal", rv);
-
-            lastPart = new byte[lastPartLen];
-            rv = _p11.C_DecryptFinal(_sessionId, lastPart, ref lastPartLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DecryptFinal", rv);
-
-            if (lastPartLen > 0)
-                outputStream.Write(lastPart, 0, Convert.ToInt32(lastPartLen));
-
-            uint digestLen = 0;
-            rv = _p11.C_DigestFinal(_sessionId, null, ref digestLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DigestFinal", rv);
-
-            byte[] digest = new byte[digestLen];
-            rv = _p11.C_DigestFinal(_sessionId, digest, ref digestLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DigestFinal", rv);
-
-            if (digest.Length != digestLen)
-                Array.Resize(ref digest, Convert.ToInt32(digestLen));
-
-            return digest;
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session80.DecryptDigest(digestingMechanism.Mechanism80, decryptionMechanism.Mechanism80, keyHandle.ObjectHandle80, inputStream, outputStream, bufferLength);
+                else
+                    return _session81.DecryptDigest(digestingMechanism.Mechanism81, decryptionMechanism.Mechanism81, keyHandle.ObjectHandle81, inputStream, outputStream, bufferLength);
+            }
         }
 
         /// <summary>
@@ -1852,61 +1836,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (bufferLength < 1)
                 throw new ArgumentException("Value has to be positive number", "bufferLength");
 
-            CK_MECHANISM ckSigningMechanism = signingMechanism.CkMechanism;
-
-            CKR rv = _p11.C_SignInit(_sessionId, ref ckSigningMechanism, signingKeyHandle.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_SignInit", rv);
-
-            CK_MECHANISM ckEncryptionMechanism = encryptionMechanism.CkMechanism;
-
-            rv = _p11.C_EncryptInit(_sessionId, ref ckEncryptionMechanism, encryptionKeyHandle.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_EncryptInit", rv);
-
-            byte[] part = new byte[bufferLength];
-            byte[] encryptedPart = new byte[bufferLength];
-            uint encryptedPartLen = Convert.ToUInt32(encryptedPart.Length);
-
-            int bytesRead = 0;
-            while ((bytesRead = inputStream.Read(part, 0, part.Length)) > 0)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                encryptedPartLen = Convert.ToUInt32(encryptedPart.Length);
-                rv = _p11.C_SignEncryptUpdate(_sessionId, part, Convert.ToUInt32(bytesRead), encryptedPart, ref encryptedPartLen);
-                if (rv != CKR.CKR_OK)
-                    throw new Pkcs11Exception("C_SignEncryptUpdate", rv);
-
-                outputStream.Write(encryptedPart, 0, Convert.ToInt32(encryptedPartLen));
+                if (Platform.StructPackingSize == 0)
+                    return _session40.SignEncrypt(signingMechanism.Mechanism40, signingKeyHandle.ObjectHandle40, encryptionMechanism.Mechanism40, encryptionKeyHandle.ObjectHandle40, inputStream, outputStream, bufferLength);
+                else
+                    return _session41.SignEncrypt(signingMechanism.Mechanism41, signingKeyHandle.ObjectHandle41, encryptionMechanism.Mechanism41, encryptionKeyHandle.ObjectHandle41, inputStream, outputStream, bufferLength);
             }
-
-            byte[] lastEncryptedPart = null;
-            uint lastEncryptedPartLen = 0;
-            rv = _p11.C_EncryptFinal(_sessionId, null, ref lastEncryptedPartLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_EncryptFinal", rv);
-
-            lastEncryptedPart = new byte[lastEncryptedPartLen];
-            rv = _p11.C_EncryptFinal(_sessionId, lastEncryptedPart, ref lastEncryptedPartLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_EncryptFinal", rv);
-
-            if (lastEncryptedPartLen > 0)
-                outputStream.Write(lastEncryptedPart, 0, Convert.ToInt32(lastEncryptedPartLen));
-
-            uint signatureLen = 0;
-            rv = _p11.C_SignFinal(_sessionId, null, ref signatureLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_SignFinal", rv);
-
-            byte[] signature = new byte[signatureLen];
-            rv = _p11.C_SignFinal(_sessionId, signature, ref signatureLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_SignFinal", rv);
-
-            if (signature.Length != signatureLen)
-                Array.Resize(ref signature, Convert.ToInt32(signatureLen));
-
-            return signature;
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session80.SignEncrypt(signingMechanism.Mechanism80, signingKeyHandle.ObjectHandle80, encryptionMechanism.Mechanism80, encryptionKeyHandle.ObjectHandle80, inputStream, outputStream, bufferLength);
+                else
+                    return _session81.SignEncrypt(signingMechanism.Mechanism81, signingKeyHandle.ObjectHandle81, encryptionMechanism.Mechanism81, encryptionKeyHandle.ObjectHandle81, inputStream, outputStream, bufferLength);
+            }
         }
 
         /// <summary>
@@ -2031,54 +1974,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (bufferLength < 1)
                 throw new ArgumentException("Value has to be positive number", "bufferLength");
 
-            CK_MECHANISM ckVerificationMechanism = verificationMechanism.CkMechanism;
-
-            CKR rv = _p11.C_VerifyInit(_sessionId, ref ckVerificationMechanism, verificationKeyHandle.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_VerifyInit", rv);
-
-            CK_MECHANISM ckDecryptionMechanism = decryptionMechanism.CkMechanism;
-
-            rv = _p11.C_DecryptInit(_sessionId, ref ckDecryptionMechanism, decryptionKeyHandle.ObjectId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DecryptInit", rv);
-
-            byte[] encryptedPart = new byte[bufferLength];
-            byte[] part = new byte[bufferLength];
-            uint partLen = Convert.ToUInt32(part.Length);
-
-            int bytesRead = 0;
-            while ((bytesRead = inputStream.Read(encryptedPart, 0, encryptedPart.Length)) > 0)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                partLen = Convert.ToUInt32(part.Length);
-                rv = _p11.C_DecryptVerifyUpdate(_sessionId, encryptedPart, Convert.ToUInt32(bytesRead), part, ref partLen);
-                if (rv != CKR.CKR_OK)
-                    throw new Pkcs11Exception("C_DecryptVerifyUpdate", rv);
-
-                outputStream.Write(part, 0, Convert.ToInt32(partLen));
+                if (Platform.StructPackingSize == 0)
+                    _session40.DecryptVerify(verificationMechanism.Mechanism40, verificationKeyHandle.ObjectHandle40, decryptionMechanism.Mechanism40, decryptionKeyHandle.ObjectHandle40, inputStream, outputStream, signature, out isValid, bufferLength);
+                else
+                    _session41.DecryptVerify(verificationMechanism.Mechanism41, verificationKeyHandle.ObjectHandle41, decryptionMechanism.Mechanism41, decryptionKeyHandle.ObjectHandle41, inputStream, outputStream, signature, out isValid, bufferLength);
             }
-
-            byte[] lastPart = null;
-            uint lastPartLen = 0;
-            rv = _p11.C_DecryptFinal(_sessionId, null, ref lastPartLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DecryptFinal", rv);
-
-            lastPart = new byte[lastPartLen];
-            rv = _p11.C_DecryptFinal(_sessionId, lastPart, ref lastPartLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DecryptFinal", rv);
-
-            if (lastPartLen > 0)
-                outputStream.Write(lastPart, 0, Convert.ToInt32(lastPartLen));
-
-            rv = _p11.C_VerifyFinal(_sessionId, signature, Convert.ToUInt32(signature.Length));
-            if (rv == CKR.CKR_OK)
-                isValid = true;
-            else if (rv == CKR.CKR_SIGNATURE_INVALID)
-                isValid = false;
-            else 
-                throw new Pkcs11Exception("C_VerifyFinal", rv);
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session80.DecryptVerify(verificationMechanism.Mechanism80, verificationKeyHandle.ObjectHandle80, decryptionMechanism.Mechanism80, decryptionKeyHandle.ObjectHandle80, inputStream, outputStream, signature, out isValid, bufferLength);
+                else
+                    _session81.DecryptVerify(verificationMechanism.Mechanism81, verificationKeyHandle.ObjectHandle81, decryptionMechanism.Mechanism81, decryptionKeyHandle.ObjectHandle81, inputStream, outputStream, signature, out isValid, bufferLength);
+            }
         }
 
         /// <summary>
@@ -2095,25 +2004,36 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (mechanism == null)
                 throw new ArgumentNullException("mechanism");
 
-            CK_MECHANISM ckMechanism = mechanism.CkMechanism;
-
-            CK_ATTRIBUTE[] template = null;
-            uint templateLength = 0;
-            
-            if (attributes != null)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                templateLength = Convert.ToUInt32(attributes.Count);
-                template = new CK_ATTRIBUTE[templateLength];
-                for (int i = 0; i < templateLength; i++)
-                    template[i] = attributes[i].CkAttribute;
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI40.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI40List(attributes);
+                    HighLevelAPI40.ObjectHandle hlaObjectHandle = _session40.GenerateKey(mechanism.Mechanism40, hlaAttributes);
+                    return new ObjectHandle(hlaObjectHandle);
+                }
+                else
+                {
+                    List<HighLevelAPI41.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI41List(attributes);
+                    HighLevelAPI41.ObjectHandle hlaObjectHandle = _session41.GenerateKey(mechanism.Mechanism41, hlaAttributes);
+                    return new ObjectHandle(hlaObjectHandle);
+                }
             }
-
-            uint keyId = CK.CK_INVALID_HANDLE;
-            CKR rv = _p11.C_GenerateKey(_sessionId, ref ckMechanism, template, templateLength, ref keyId);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_GenerateKey", rv);
-
-            return new ObjectHandle(keyId);
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI80.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI80List(attributes);
+                    HighLevelAPI80.ObjectHandle hlaObjectHandle = _session80.GenerateKey(mechanism.Mechanism80, hlaAttributes);
+                    return new ObjectHandle(hlaObjectHandle);
+                }
+                else
+                {
+                    List<HighLevelAPI81.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI81List(attributes);
+                    HighLevelAPI81.ObjectHandle hlaObjectHandle = _session81.GenerateKey(mechanism.Mechanism81, hlaAttributes);
+                    return new ObjectHandle(hlaObjectHandle);
+                }
+            }
         }
 
         /// <summary>
@@ -2132,42 +2052,64 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (mechanism == null)
                 throw new ArgumentNullException("mechanism");
 
-            CK_MECHANISM ckMechanism = mechanism.CkMechanism;
-
-            CK_ATTRIBUTE[] publicKeyTemplate = null;
-            uint publicKeyTemplateLength = 0;
-            
-            if (publicKeyAttributes != null)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                publicKeyTemplateLength = Convert.ToUInt32(publicKeyAttributes.Count);
-                publicKeyTemplate = new CK_ATTRIBUTE[publicKeyTemplateLength];
-                for (int i = 0; i < publicKeyTemplateLength; i++)
-                    publicKeyTemplate[i] = publicKeyAttributes[i].CkAttribute;
-            }
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI40.ObjectAttribute> hlaPublicKeyAttributes = ObjectAttribute.ConvertToHighLevelAPI40List(publicKeyAttributes);
+                    List<HighLevelAPI40.ObjectAttribute> hlaPrivateKeyAttributes = ObjectAttribute.ConvertToHighLevelAPI40List(privateKeyAttributes);
 
-            CK_ATTRIBUTE[] privateKeyTemplate = null;
-            uint privateKeyTemplateLength = 0;
-            
-            if (privateKeyAttributes != null)
-            {
-                privateKeyTemplateLength = Convert.ToUInt32(privateKeyAttributes.Count);
-                privateKeyTemplate = new CK_ATTRIBUTE[privateKeyTemplateLength];
-                for (int i = 0; i < privateKeyTemplateLength; i++)
-                    privateKeyTemplate[i] = privateKeyAttributes[i].CkAttribute;
-            }
+                    HighLevelAPI40.ObjectHandle hlaPublicKeyHandle = null;
+                    HighLevelAPI40.ObjectHandle hlaPrivateKeyHandle = null;
 
-            uint publicKeyId = CK.CK_INVALID_HANDLE;
-            uint privateKeyId = CK.CK_INVALID_HANDLE;
-            Console.Write("C_GenerateKeyPair: ");
-            CKR rv = _p11.C_GenerateKeyPair(_sessionId, ref ckMechanism, publicKeyTemplate, publicKeyTemplateLength, privateKeyTemplate, privateKeyTemplateLength, ref publicKeyId, ref privateKeyId);
-            if (rv != CKR.CKR_OK)
-            {
-                Console.WriteLine(" -> {0}", rv);
-                throw new Pkcs11Exception("C_GenerateKeyPair", rv);
+                    _session40.GenerateKeyPair(mechanism.Mechanism40, hlaPublicKeyAttributes, hlaPrivateKeyAttributes, out hlaPublicKeyHandle, out hlaPrivateKeyHandle);
+
+                    publicKeyHandle = new ObjectHandle(hlaPublicKeyHandle);
+                    privateKeyHandle = new ObjectHandle(hlaPrivateKeyHandle);
+                }
+                else
+                {
+                    List<HighLevelAPI41.ObjectAttribute> hlaPublicKeyAttributes = ObjectAttribute.ConvertToHighLevelAPI41List(publicKeyAttributes);
+                    List<HighLevelAPI41.ObjectAttribute> hlaPrivateKeyAttributes = ObjectAttribute.ConvertToHighLevelAPI41List(privateKeyAttributes);
+
+                    HighLevelAPI41.ObjectHandle hlaPublicKeyHandle = null;
+                    HighLevelAPI41.ObjectHandle hlaPrivateKeyHandle = null;
+
+                    _session41.GenerateKeyPair(mechanism.Mechanism41, hlaPublicKeyAttributes, hlaPrivateKeyAttributes, out hlaPublicKeyHandle, out hlaPrivateKeyHandle);
+
+                    publicKeyHandle = new ObjectHandle(hlaPublicKeyHandle);
+                    privateKeyHandle = new ObjectHandle(hlaPrivateKeyHandle);
+                }
             }
-            Console.WriteLine(" -> {0}", rv);
-            publicKeyHandle = new ObjectHandle(publicKeyId);
-            privateKeyHandle = new ObjectHandle(privateKeyId);
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI80.ObjectAttribute> hlaPublicKeyAttributes = ObjectAttribute.ConvertToHighLevelAPI80List(publicKeyAttributes);
+                    List<HighLevelAPI80.ObjectAttribute> hlaPrivateKeyAttributes = ObjectAttribute.ConvertToHighLevelAPI80List(privateKeyAttributes);
+
+                    HighLevelAPI80.ObjectHandle hlaPublicKeyHandle = null;
+                    HighLevelAPI80.ObjectHandle hlaPrivateKeyHandle = null;
+
+                    _session80.GenerateKeyPair(mechanism.Mechanism80, hlaPublicKeyAttributes, hlaPrivateKeyAttributes, out hlaPublicKeyHandle, out hlaPrivateKeyHandle);
+
+                    publicKeyHandle = new ObjectHandle(hlaPublicKeyHandle);
+                    privateKeyHandle = new ObjectHandle(hlaPrivateKeyHandle);
+                }
+                else
+                {
+                    List<HighLevelAPI81.ObjectAttribute> hlaPublicKeyAttributes = ObjectAttribute.ConvertToHighLevelAPI81List(publicKeyAttributes);
+                    List<HighLevelAPI81.ObjectAttribute> hlaPrivateKeyAttributes = ObjectAttribute.ConvertToHighLevelAPI81List(privateKeyAttributes);
+
+                    HighLevelAPI81.ObjectHandle hlaPublicKeyHandle = null;
+                    HighLevelAPI81.ObjectHandle hlaPrivateKeyHandle = null;
+
+                    _session81.GenerateKeyPair(mechanism.Mechanism81, hlaPublicKeyAttributes, hlaPrivateKeyAttributes, out hlaPublicKeyHandle, out hlaPrivateKeyHandle);
+
+                    publicKeyHandle = new ObjectHandle(hlaPublicKeyHandle);
+                    privateKeyHandle = new ObjectHandle(hlaPrivateKeyHandle);
+                }
+            }
         }
 
         /// <summary>
@@ -2191,29 +2133,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (keyHandle == null)
                 throw new ArgumentNullException("keyHandle");
 
-            CK_MECHANISM ckMechanism = mechanism.CkMechanism;
-
-            uint wrappedKeyLen = 0;
-            Console.Write("C_WrapKey: ");
-            CKR rv = _p11.C_WrapKey(_sessionId, ref ckMechanism, wrappingKeyHandle.ObjectId, keyHandle.ObjectId, null, ref wrappedKeyLen);
-            if (rv != CKR.CKR_OK)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                Console.WriteLine("-> {0}", rv);
-                throw new Pkcs11Exception("C_WrapKey", rv);
+                if (Platform.StructPackingSize == 0)
+                    return _session40.WrapKey(mechanism.Mechanism40, wrappingKeyHandle.ObjectHandle40, keyHandle.ObjectHandle40);
+                else
+                    return _session41.WrapKey(mechanism.Mechanism41, wrappingKeyHandle.ObjectHandle41, keyHandle.ObjectHandle41);
             }
-            byte[] wrappedKey = new byte[wrappedKeyLen];
-            Console.Write("C_WrapKey: ");
-            rv = _p11.C_WrapKey(_sessionId, ref ckMechanism, wrappingKeyHandle.ObjectId, keyHandle.ObjectId, wrappedKey, ref wrappedKeyLen);
-            if (rv != CKR.CKR_OK)
+            else
             {
-                Console.WriteLine("-> {0}", rv);
-                throw new Pkcs11Exception("C_WrapKey", rv);
+                if (Platform.StructPackingSize == 0)
+                    return _session80.WrapKey(mechanism.Mechanism80, wrappingKeyHandle.ObjectHandle80, keyHandle.ObjectHandle80);
+                else
+                    return _session81.WrapKey(mechanism.Mechanism81, wrappingKeyHandle.ObjectHandle81, keyHandle.ObjectHandle81);
             }
-            Console.WriteLine("-> {0}", rv);
-            if (wrappedKey.Length != wrappedKeyLen)
-                Array.Resize(ref wrappedKey, Convert.ToInt32(wrappedKeyLen));
-
-            return wrappedKey;
         }
 
         /// <summary>
@@ -2238,28 +2171,36 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (wrappedKey == null)
                 throw new ArgumentNullException("wrappedKey");
 
-            CK_MECHANISM ckMechanism = mechanism.CkMechanism;
-
-            CK_ATTRIBUTE[] template = null;
-            uint templateLen = 0;
-            if (attributes != null)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                template = new CK_ATTRIBUTE[attributes.Count];
-                for (int i = 0; i < attributes.Count; i++)
-                    template[i] = attributes[i].CkAttribute;
-                templateLen = Convert.ToUInt32(attributes.Count);
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI40.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI40List(attributes);
+                    HighLevelAPI40.ObjectHandle unwrappedKeyHandle = _session40.UnwrapKey(mechanism.Mechanism40, unwrappingKeyHandle.ObjectHandle40, wrappedKey, hlaAttributes);
+                    return new ObjectHandle(unwrappedKeyHandle);
+                }
+                else
+                {
+                    List<HighLevelAPI41.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI41List(attributes);
+                    HighLevelAPI41.ObjectHandle unwrappedKeyHandle = _session41.UnwrapKey(mechanism.Mechanism41, unwrappingKeyHandle.ObjectHandle41, wrappedKey, hlaAttributes);
+                    return new ObjectHandle(unwrappedKeyHandle);
+                }
             }
-
-            uint unwrappedKey = CK.CK_INVALID_HANDLE;
-            Console.Write("C_UnwrapKey: ");
-            CKR rv = _p11.C_UnwrapKey(_sessionId, ref ckMechanism, unwrappingKeyHandle.ObjectId, wrappedKey, Convert.ToUInt32(wrappedKey.Length), template, templateLen, ref unwrappedKey);
-            if (rv != CKR.CKR_OK)
+            else
             {
-                Console.WriteLine("-> {0}", rv);
-                throw new Pkcs11Exception("C_UnwrapKey", rv);
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI80.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI80List(attributes);
+                    HighLevelAPI80.ObjectHandle unwrappedKeyHandle = _session80.UnwrapKey(mechanism.Mechanism80, unwrappingKeyHandle.ObjectHandle80, wrappedKey, hlaAttributes);
+                    return new ObjectHandle(unwrappedKeyHandle);
+                }
+                else
+                {
+                    List<HighLevelAPI81.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI81List(attributes);
+                    HighLevelAPI81.ObjectHandle unwrappedKeyHandle = _session81.UnwrapKey(mechanism.Mechanism81, unwrappingKeyHandle.ObjectHandle81, wrappedKey, hlaAttributes);
+                    return new ObjectHandle(unwrappedKeyHandle);
+                }
             }
-            Console.WriteLine("-> {0}", rv);
-            return new ObjectHandle(unwrappedKey);
         }
 
         /// <summary>
@@ -2280,24 +2221,36 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (baseKeyHandle == null)
                 throw new ArgumentNullException("baseKeyHandle");
 
-            CK_MECHANISM ckMechanism = mechanism.CkMechanism;
-
-            CK_ATTRIBUTE[] template = null;
-            uint templateLen = 0;
-            if (attributes != null)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                template = new CK_ATTRIBUTE[attributes.Count];
-                for (int i = 0; i < attributes.Count; i++)
-                    template[i] = attributes[i].CkAttribute;
-                templateLen = Convert.ToUInt32(attributes.Count);
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI40.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI40List(attributes);
+                    HighLevelAPI40.ObjectHandle unwrappedKeyHandle = _session40.DeriveKey(mechanism.Mechanism40, baseKeyHandle.ObjectHandle40, hlaAttributes);
+                    return new ObjectHandle(unwrappedKeyHandle);
+                }
+                else
+                {
+                    List<HighLevelAPI41.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI41List(attributes);
+                    HighLevelAPI41.ObjectHandle unwrappedKeyHandle = _session41.DeriveKey(mechanism.Mechanism41, baseKeyHandle.ObjectHandle41, hlaAttributes);
+                    return new ObjectHandle(unwrappedKeyHandle);
+                }
             }
-
-            uint derivedKey = CK.CK_INVALID_HANDLE;
-            CKR rv = _p11.C_DeriveKey(_sessionId, ref ckMechanism, baseKeyHandle.ObjectId, template, templateLen, ref derivedKey);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DeriveKey", rv);
-
-            return new ObjectHandle(derivedKey);
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                {
+                    List<HighLevelAPI80.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI80List(attributes);
+                    HighLevelAPI80.ObjectHandle unwrappedKeyHandle = _session80.DeriveKey(mechanism.Mechanism80, baseKeyHandle.ObjectHandle80, hlaAttributes);
+                    return new ObjectHandle(unwrappedKeyHandle);
+                }
+                else
+                {
+                    List<HighLevelAPI81.ObjectAttribute> hlaAttributes = ObjectAttribute.ConvertToHighLevelAPI81List(attributes);
+                    HighLevelAPI81.ObjectHandle unwrappedKeyHandle = _session81.DeriveKey(mechanism.Mechanism81, baseKeyHandle.ObjectHandle81, hlaAttributes);
+                    return new ObjectHandle(unwrappedKeyHandle);
+                }
+            }
         }
 
         /// <summary>
@@ -2312,9 +2265,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (seed == null)
                 throw new ArgumentNullException("seed");
 
-            CKR rv = _p11.C_SeedRandom(_sessionId, seed, Convert.ToUInt32(seed.Length));
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_SeedRandom", rv);
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session40.SeedRandom(seed);
+                else
+                    _session41.SeedRandom(seed);
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session80.SeedRandom(seed);
+                else
+                    _session81.SeedRandom(seed);
+            }
         }
 
         /// <summary>
@@ -2330,20 +2294,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI
             if (length < 1)
                 throw new ArgumentException("Value has to be positive number", "length");
 
-            byte[] randomData = new byte[length];
-            /*            Console.Write("C_WrapKey: ");
-            CKR rv = _p11.C_WrapKey(_sessionId, ref ckMechanism, wrappingKeyHandle.ObjectId, keyHandle.ObjectId, null, ref wrappedKeyLen);
-            if (rv != CKR.CKR_OK)
-                Console.WriteLine("-> {0}", rv);*/
-            Console.Write("C_GenerateRandom: ");
-            CKR rv = _p11.C_GenerateRandom(_sessionId, randomData, Convert.ToUInt32(length));
-            if (rv != CKR.CKR_OK)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                Console.WriteLine("-> {0}", rv);
-                throw new Pkcs11Exception("C_GenerateRandom", rv);
+                if (Platform.StructPackingSize == 0)
+                    return _session40.GenerateRandom(length);
+                else
+                    return _session41.GenerateRandom(length);
             }
-            Console.WriteLine("-> {0}", rv);
-            return randomData;
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    return _session80.GenerateRandom(length);
+                else
+                    return _session81.GenerateRandom(length);
+            }
         }
 
         /// <summary>
@@ -2353,11 +2317,21 @@ namespace Net.Pkcs11Interop.HighLevelAPI
         {
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
-            Console.Write("C_GetFunctionStatus: ");
-            CKR rv = _p11.C_GetFunctionStatus(_sessionId);
-            Console.WriteLine("-> {0}", rv);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_GetFunctionStatus", rv);
+
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session40.GetFunctionStatus();
+                else
+                    _session41.GetFunctionStatus();
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session80.GetFunctionStatus();
+                else
+                    _session81.GetFunctionStatus();
+            }
         }
 
         /// <summary>
@@ -2367,11 +2341,21 @@ namespace Net.Pkcs11Interop.HighLevelAPI
         {
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
-            Console.Write("C_CancelFunction: ");
-            CKR rv = _p11.C_CancelFunction(_sessionId);
-            Console.WriteLine("-> {0}", rv);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_CancelFunction", rv);
+
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session40.CancelFunction();
+                else
+                    _session41.CancelFunction();
+            }
+            else
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session80.CancelFunction();
+                else
+                    _session81.CancelFunction();
+            }
         }
 
         #region IDisposable
@@ -2396,11 +2380,33 @@ namespace Net.Pkcs11Interop.HighLevelAPI
                 if (disposing)
                 {
                     // Dispose managed objects
-                    if (_sessionId != CK.CK_INVALID_HANDLE)
-                        CloseSession();
+                    if (_session40 != null)
+                    {
+                        _session40.Dispose();
+                        _session40 = null;
+                    }
+
+                    if (_session41 != null)
+                    {
+                        _session41.Dispose();
+                        _session41 = null;
+                    }
+
+                    if (_session80 != null)
+                    {
+                        _session80.Dispose();
+                        _session80 = null;
+                    }
+
+                    if (_session81 != null)
+                    {
+                        _session81.Dispose();
+                        _session81 = null;
+                    }
                 }
 
                 // Dispose unmanaged objects
+
                 _disposed = true;
             }
         }

@@ -9,7 +9,7 @@
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.к
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
@@ -110,11 +110,14 @@ namespace Net.Pkcs11Interop.HighLevelAPI41
         {
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
-
+            Console.Write("C_CloseSession: ");
             CKR rv = _p11.C_CloseSession(_sessionId);
+            Console.WriteLine("-> {0}", rv);
             if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_CloseSession", rv);
 
+          
+                throw new Pkcs11Exception("C_CloseSession", rv);
+    
             _sessionId = CK.CK_INVALID_HANDLE;
         }
 
@@ -134,8 +137,9 @@ namespace Net.Pkcs11Interop.HighLevelAPI41
                 pinValue = ConvertUtils.Utf8StringToBytes(userPin);
                 pinValueLen = Convert.ToUInt32(pinValue.Length);
             }
-
+            Console.WriteLine("C_InitPIN: ");
             CKR rv = _p11.C_InitPIN(_sessionId, pinValue, pinValueLen);
+            Console.WriteLine("-> {0}", rv);
             if (rv != CKR.CKR_OK)
                 throw new Pkcs11Exception("C_InitPIN", rv);
         }
@@ -2154,10 +2158,14 @@ namespace Net.Pkcs11Interop.HighLevelAPI41
 
             uint publicKeyId = CK.CK_INVALID_HANDLE;
             uint privateKeyId = CK.CK_INVALID_HANDLE;
+            Console.Write("C_GenerateKeyPair: ");
             CKR rv = _p11.C_GenerateKeyPair(_sessionId, ref ckMechanism, publicKeyTemplate, publicKeyTemplateLength, privateKeyTemplate, privateKeyTemplateLength, ref publicKeyId, ref privateKeyId);
             if (rv != CKR.CKR_OK)
+            {
+                Console.WriteLine(" -> {0}", rv);
                 throw new Pkcs11Exception("C_GenerateKeyPair", rv);
-
+            }
+            Console.WriteLine(" -> {0}", rv);
             publicKeyHandle = new ObjectHandle(publicKeyId);
             privateKeyHandle = new ObjectHandle(privateKeyId);
         }
@@ -2186,15 +2194,22 @@ namespace Net.Pkcs11Interop.HighLevelAPI41
             CK_MECHANISM ckMechanism = mechanism.CkMechanism;
 
             uint wrappedKeyLen = 0;
+            Console.Write("C_WrapKey: ");
             CKR rv = _p11.C_WrapKey(_sessionId, ref ckMechanism, wrappingKeyHandle.ObjectId, keyHandle.ObjectId, null, ref wrappedKeyLen);
             if (rv != CKR.CKR_OK)
+            {
+                Console.WriteLine("-> {0}", rv);
                 throw new Pkcs11Exception("C_WrapKey", rv);
-
+            }
             byte[] wrappedKey = new byte[wrappedKeyLen];
+            Console.Write("C_WrapKey: ");
             rv = _p11.C_WrapKey(_sessionId, ref ckMechanism, wrappingKeyHandle.ObjectId, keyHandle.ObjectId, wrappedKey, ref wrappedKeyLen);
             if (rv != CKR.CKR_OK)
+            {
+                Console.WriteLine("-> {0}", rv);
                 throw new Pkcs11Exception("C_WrapKey", rv);
-
+            }
+            Console.WriteLine("-> {0}", rv);
             if (wrappedKey.Length != wrappedKeyLen)
                 Array.Resize(ref wrappedKey, Convert.ToInt32(wrappedKeyLen));
 
@@ -2236,10 +2251,14 @@ namespace Net.Pkcs11Interop.HighLevelAPI41
             }
 
             uint unwrappedKey = CK.CK_INVALID_HANDLE;
+            Console.Write("C_UnwrapKey: ");
             CKR rv = _p11.C_UnwrapKey(_sessionId, ref ckMechanism, unwrappingKeyHandle.ObjectId, wrappedKey, Convert.ToUInt32(wrappedKey.Length), template, templateLen, ref unwrappedKey);
             if (rv != CKR.CKR_OK)
+            {
+                Console.WriteLine("-> {0}", rv);
                 throw new Pkcs11Exception("C_UnwrapKey", rv);
-
+            }
+            Console.WriteLine("-> {0}", rv);
             return new ObjectHandle(unwrappedKey);
         }
 
@@ -2312,10 +2331,18 @@ namespace Net.Pkcs11Interop.HighLevelAPI41
                 throw new ArgumentException("Value has to be positive number", "length");
 
             byte[] randomData = new byte[length];
+            /*            Console.Write("C_WrapKey: ");
+            CKR rv = _p11.C_WrapKey(_sessionId, ref ckMechanism, wrappingKeyHandle.ObjectId, keyHandle.ObjectId, null, ref wrappedKeyLen);
+            if (rv != CKR.CKR_OK)
+                Console.WriteLine("-> {0}", rv);*/
+            Console.Write("C_GenerateRandom: ");
             CKR rv = _p11.C_GenerateRandom(_sessionId, randomData, Convert.ToUInt32(length));
             if (rv != CKR.CKR_OK)
+            {
+                Console.WriteLine("-> {0}", rv);
                 throw new Pkcs11Exception("C_GenerateRandom", rv);
-
+            }
+            Console.WriteLine("-> {0}", rv);
             return randomData;
         }
 
@@ -2326,8 +2353,9 @@ namespace Net.Pkcs11Interop.HighLevelAPI41
         {
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
-
+            Console.Write("C_GetFunctionStatus: ");
             CKR rv = _p11.C_GetFunctionStatus(_sessionId);
+            Console.WriteLine("-> {0}", rv);
             if (rv != CKR.CKR_OK)
                 throw new Pkcs11Exception("C_GetFunctionStatus", rv);
         }
@@ -2339,8 +2367,9 @@ namespace Net.Pkcs11Interop.HighLevelAPI41
         {
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
-
+            Console.Write("C_CancelFunction: ");
             CKR rv = _p11.C_CancelFunction(_sessionId);
+            Console.WriteLine("-> {0}", rv);
             if (rv != CKR.CKR_OK)
                 throw new Pkcs11Exception("C_CancelFunction", rv);
         }
