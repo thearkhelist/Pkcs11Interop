@@ -48,7 +48,7 @@ namespace Net.Pkcs11Interop.Tests
         /// <summary>
         /// Relative name or absolute path of unmanaged PKCS#11 library provided by smartcard or HSM vendor.
         /// </summary>
-        public static string Pkcs11LibraryPath = @"rtPKCS11.dll";
+        public static string Pkcs11LibraryPath = @"rtPKCS11ECP.dll";
 #endif
 
         /// <summary>
