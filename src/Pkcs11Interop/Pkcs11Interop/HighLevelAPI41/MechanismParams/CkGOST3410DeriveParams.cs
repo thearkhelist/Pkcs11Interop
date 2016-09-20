@@ -53,20 +53,20 @@ namespace Net.Pkcs11Interop.HighLevelAPI41.MechanismParams
             _lowLevelStruct.ulPublicDataLen = 0;
             _lowLevelStruct.pUKM = IntPtr.Zero;
             _lowLevelStruct.ulUkmLen = 0;
-            _lowLevelStruct.kdf = kdf;
+            _lowLevelStruct.kdf = Convert.ToUInt32(kdf);
 
             if (publicData != null)
             {
                 _lowLevelStruct.pPublicData = UnmanagedMemory.Allocate(publicData.Length);
                 UnmanagedMemory.Write(_lowLevelStruct.pPublicData, publicData);
-                _lowLevelStruct.ulPublicDataLen = Convert.ToUInt64(publicData.Length);
+                _lowLevelStruct.ulPublicDataLen = Convert.ToUInt32(publicData.Length);
             }
 
             if (UKM != null)
             {
                 _lowLevelStruct.pUKM = UnmanagedMemory.Allocate(UKM.Length);
                 UnmanagedMemory.Write(_lowLevelStruct.pUKM, UKM);
-                _lowLevelStruct.ulUkmLen = Convert.ToUInt64(UKM.Length);
+                _lowLevelStruct.ulUkmLen = Convert.ToUInt32(UKM.Length);
             }
 
         }

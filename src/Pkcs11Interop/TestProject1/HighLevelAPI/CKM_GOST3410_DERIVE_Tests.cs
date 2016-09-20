@@ -40,35 +40,34 @@ namespace TestProject1.HighLevelAPI
                     for (int i = 0; i < 64; i++)
                         data[i] = 0;
                     data = objectAttributes[0].GetValueAsByteArray();
-
-
-                    byte[] ukm = session.GenerateRandom(8); //{ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 };
-
-                    // Specify mechanism parameters
-                    CkGOST3410DeriveParams mechanismParams = new CkGOST3410DeriveParams(ukm, data);
-
+                    
                     // Specify derivation mechanism with parameters
+                    byte[] ukm = session.GenerateRandom(8);
+                    CkGOST3410DeriveParams mechanismParams = new CkGOST3410DeriveParams(ukm, data);
                     Mechanism mechanism = new Mechanism(CKM.CKM_GOSTR3410_DERIVE, mechanismParams);
 
+                   
 
+                    // Attributes for derived key
                     objectAttributes = new List<ObjectAttribute>();
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_SECRET_KEY));
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_GOST28147));
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, false));
-                    //objectAttributes.Add(new ObjectAttribute(CKA.CKA_MODIFIABLE, true));
-                    //objectAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, true));
-                    //objectAttributes.Add(new ObjectAttribute(CKA.CKA_EXTRACTABLE, true));
-                    //objectAttributes.Add(new ObjectAttribute(CKA.CKA_SENSITIVE, false));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_MODIFIABLE, true));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, true));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_EXTRACTABLE, true));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_SENSITIVE, false));
 
                     // Derive key
                     ObjectHandle derivedKey = session.DeriveKey(mechanism, privateKey, objectAttributes);
 
                     // Do something interesting with derived key
-                    //Assert.IsTrue(derivedKey.ObjectId != CK.CK_INVALID_HANDLE);
+                    Assert.IsTrue(derivedKey.ObjectId != CK.CK_INVALID_HANDLE);
 
-                    //session.DestroyObject(baseKey);
-                    //session.DestroyObject(derivedKey);
+                    session.DestroyObject(privateKey);
+                    session.DestroyObject(publicKey);
+                    session.DestroyObject(derivedKey);
                     session.Logout();
                 }
             }

@@ -146,45 +146,45 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
         /// <param name='privateKeyHandle'>Output parameter for private key object handle</param>
         public static void GenerateKeyPair(Session session, out ObjectHandle publicKeyHandle, out ObjectHandle privateKeyHandle)
         {
-                    byte[] ckaId = session.GenerateRandom(20);
-
-                    byte[] GOST3410_params_oid = { 0x06, 0x07, 0x2a, 0x85, 0x03, 0x02, 0x02, 0x23, 0x01 };
-                    byte[] GOST3411_params_oid = { 0x06, 0x07, 0x2a, 0x85, 0x03, 0x02, 0x02, 0x1e, 0x01 };
-                    byte[] GOST28147_params_oid = { 0x06, 0x07, 0x2a, 0x85, 0x03, 0x02, 0x02, 0x1f, 0x01 };
-                    byte[] subject = { 0x06, 0x07, 0x2a };
+            byte[] ckaId = session.GenerateRandom(20);
+            byte[] GOST3410_params_oid = { 0x06, 0x07, 0x2a, 0x85, 0x03, 0x02, 0x02, 0x23, 0x01 };
+            byte[] GOST3411_params_oid = { 0x06, 0x07, 0x2a, 0x85, 0x03, 0x02, 0x02, 0x1e, 0x01 };
+            byte[] GOST28147_params_oid = { 0x06, 0x07, 0x2a, 0x85, 0x03, 0x02, 0x02, 0x1f, 0x01 };
+            byte[] subject = { 0x06, 0x07, 0x2a };
 
                     // Prepare attribute template of new public key
-                    List<ObjectAttribute> publicKeyAttributes = new List<ObjectAttribute>();
-                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_PUBLIC_KEY));
-                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_GOSTR3410));
-                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
-                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, false));
-                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
-                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_ID, ckaId));
-                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_WRAP, true));
-                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_VERIFY, true));
-                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOSTR3410PARAMS, GOST3410_params_oid));
-                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOSTR3411PARAMS, GOST3411_params_oid));
-                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOST28147PARAMS, GOST28147_params_oid));
+            List<ObjectAttribute> publicKeyAttributes = new List<ObjectAttribute>();
+            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_PUBLIC_KEY));
+            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
+            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_ID, ckaId));
+            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_GOSTR3410));
+            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
+            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, false));
+                    //publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_WRAP, true));
+                    //publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_VERIFY, true));
+            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOSTR3410PARAMS, GOST3410_params_oid));
+                    //publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOSTR3411PARAMS, GOST3411_params_oid));
+                    //publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOST28147PARAMS, GOST28147_params_oid));
 
                     // Prepare attribute template of new private key
-                    List<ObjectAttribute> privateKeyAttributes = new List<ObjectAttribute>();
-                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_PRIVATE_KEY));
-                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_GOSTR3410));
-                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
-                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, true));
-                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
-                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_SUBJECT, subject));
-                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_ID, ckaId));
-                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_UNWRAP, true));
-                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_EXTRACTABLE, true));
+            List<ObjectAttribute> privateKeyAttributes = new List<ObjectAttribute>();
+            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_PRIVATE_KEY));
+            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
+            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_ID, ckaId));
+            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_GOSTR3410));
+            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
+            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, true));
+            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_DERIVE, true));
+            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_SUBJECT, subject));
+                    //privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_UNWRAP, true));
+                    //privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_EXTRACTABLE, true));
                     //privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_SENSITIVE, true));
                     //privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_DECRYPT, true));
-                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_SIGN, true));
+                    //privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_SIGN, true));
                     //privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_UNWRAP, true));
-                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOSTR3410PARAMS, GOST3410_params_oid));
-                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOSTR3411PARAMS, GOST3411_params_oid));
-                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOST28147PARAMS, GOST28147_params_oid));
+            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOSTR3410PARAMS, GOST3410_params_oid));
+            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOSTR3411PARAMS, GOST3411_params_oid));
+                    //privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOST28147PARAMS, GOST28147_params_oid));
 
                     // Specify key generation mechanism
                     Mechanism mechanism = new Mechanism(CKM.CKM_GOSTR3410_KEY_PAIR_GEN);

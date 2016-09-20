@@ -33,7 +33,7 @@ namespace Net.Pkcs11Interop.LowLevelAPI41.MechanismParams
         /// <summary>
         /// identifier of the key derivation function
         /// </summary>
-        public ulong kdf;
+        public UInt32 kdf;
 
         /// <summary>
         /// pointer to data with public key of a receiver
@@ -43,7 +43,7 @@ namespace Net.Pkcs11Interop.LowLevelAPI41.MechanismParams
         /// <summary>
         /// length of data with public key of a receiver (must be 64)
         /// </summary>
-        public ulong ulPublicDataLen;
+        public UInt32 ulPublicDataLen;
 
         /// <summary>
         /// pointer to a UKM data
@@ -53,7 +53,7 @@ namespace Net.Pkcs11Interop.LowLevelAPI41.MechanismParams
         /// <summary>
         /// length of UKM data in bytes (must be 8)
         /// </summary>
-        public ulong ulUkmLen;
+        public UInt32 ulUkmLen;
 
 
 
