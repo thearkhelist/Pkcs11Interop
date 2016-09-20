@@ -42,7 +42,7 @@ namespace TestProject1.HighLevelAPI
                     data = objectAttributes[0].GetValueAsByteArray();
 
 
-                    byte[] ukm = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 };
+                    byte[] ukm = session.GenerateRandom(8); //{ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 };
 
                     // Specify mechanism parameters
                     CkGOST3410DeriveParams mechanismParams = new CkGOST3410DeriveParams(ukm, data);
@@ -56,10 +56,10 @@ namespace TestProject1.HighLevelAPI
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_GOST28147));
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, false));
-                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_MODIFIABLE, true));
-                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, true));
-                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_EXTRACTABLE, true));
-                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_SENSITIVE, false));
+                    //objectAttributes.Add(new ObjectAttribute(CKA.CKA_MODIFIABLE, true));
+                    //objectAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, true));
+                    //objectAttributes.Add(new ObjectAttribute(CKA.CKA_EXTRACTABLE, true));
+                    //objectAttributes.Add(new ObjectAttribute(CKA.CKA_SENSITIVE, false));
 
                     // Derive key
                     ObjectHandle derivedKey = session.DeriveKey(mechanism, privateKey, objectAttributes);

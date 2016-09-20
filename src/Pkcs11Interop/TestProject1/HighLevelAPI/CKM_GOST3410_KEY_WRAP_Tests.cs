@@ -12,7 +12,7 @@ namespace TestProject1.HighLevelAPI
     [TestClass]
     public class CKM_GOST3410_KEY_WRAP
     {
-        [TestMethod]
+        /*[TestMethod]
         public void _01_BasicWrapAndUnwrapKeyTest()
         {
             using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, Settings.UseOsLocking))
@@ -101,6 +101,6 @@ namespace TestProject1.HighLevelAPI
                     session.Logout();
                 }
             }
-        }
+        }*/
     }
 }

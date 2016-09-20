@@ -63,7 +63,7 @@ namespace Net.Pkcs11Interop.HighLevelAPI.MechanismParams
         public CkGOST3410DeriveParams(byte[] ukm, byte[] publicData)
         {
           
-                ulong kdf = (ulong) CKD.CKD_NULL;
+            ulong kdf = (ulong) CKD.CKD_CPDIVERSIFY_KDF;
             
             if (Platform.UnmanagedLongSize == 4)
             {

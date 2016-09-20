@@ -92,8 +92,8 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                     Assert.IsTrue(Convert.ToBase64String(digest) == "e1AsOh9IyGCa4hLN+2Od7jlnP14=");
                 }
             }
-        }
-        */
+        }*/
+        
         /// <summary>
         /// DigestKey test.
         /// </summary>

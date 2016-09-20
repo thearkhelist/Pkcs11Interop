@@ -52,8 +52,8 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                     // Do something interesting with random number generator
                 }
             }
-        }
-        */
+        }*/
+        
         /// <summary>
         /// C_GenerateRandom test.
         /// </summary>
