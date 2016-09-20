@@ -34,7 +34,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
         /// <summary>
         /// SeedRandom test.
         /// </summary>
-        [TestMethod]
+        /*[TestMethod]
         public void _01_SeedRandomTest()
         {
             using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, Settings.UseOsLocking))
@@ -53,7 +53,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                 }
             }
         }
-        
+        */
         /// <summary>
         /// C_GenerateRandom test.
         /// </summary>

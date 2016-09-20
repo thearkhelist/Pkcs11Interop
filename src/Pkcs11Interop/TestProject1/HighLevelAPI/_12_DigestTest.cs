@@ -64,7 +64,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
         /// <summary>
         /// Multi-part digesting test.
         /// </summary>
-        [TestMethod]
+        /*[TestMethod]
         public void _02_DigestMultiPartTest()
         {
             using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, Settings.UseOsLocking))
@@ -93,11 +93,11 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                 }
             }
         }
-        
+        */
         /// <summary>
         /// DigestKey test.
         /// </summary>
-        [TestMethod]
+        /*[TestMethod]
         public void _03_DigestKeyTest()
         {
             using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, Settings.UseOsLocking))
@@ -127,7 +127,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                     session.Logout();
                 }
             }
-        }
+        }*/
     }
 }
 

@@ -73,7 +73,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
         /// <summary>
         /// CopyObject test.
         /// </summary>
-        [TestMethod]
+        /*[TestMethod]
         public void _02_CopyObjectTest()
         {
             using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, Settings.UseOsLocking))
@@ -101,11 +101,11 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                 }
             }
         }
-        
+        */
         /// <summary>
         /// GetObjectSize test.
         /// </summary>
-        [TestMethod]
+        /*[TestMethod]
         public void _03_GetObjectSizeTest()
         {
             using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, Settings.UseOsLocking))
@@ -132,6 +132,6 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                     session.Logout();
                 }
             }
-        }
+        }*/
     }
 }

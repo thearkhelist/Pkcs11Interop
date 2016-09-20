@@ -1,4 +1,3 @@
-<<<<<<< HEAD:src/Pkcs11Interop/TestProject1/HighLevelAPI/Helpers.cs
 /*
  *  Copyright 2012-2016 The Pkcs11Interop Project
  *
@@ -114,18 +113,27 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
         /// <returns>Object handle</returns>
         public static ObjectHandle GenerateKey(Session session)
         {
-            // Prepare attribute template of new key
+            byte[] ckaId = session.GenerateRandom(20);
+
+            byte[] value = session.GenerateRandom(20);
+
+            byte[] GOST28147_params_oid = { 0x06, 0x07, 0x2a, 0x85, 0x03, 0x02, 0x02, 0x1f, 0x01 };                    // Prepare attribute template of new key
             List<ObjectAttribute> objectAttributes = new List<ObjectAttribute>();
             objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_SECRET_KEY));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_DES3));
+            objectAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_GOST28147));
+            objectAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
+            objectAttributes.Add(new ObjectAttribute(CKA.CKA_ID, ckaId));
             objectAttributes.Add(new ObjectAttribute(CKA.CKA_ENCRYPT, true));
             objectAttributes.Add(new ObjectAttribute(CKA.CKA_DECRYPT, true));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_DERIVE, true));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_EXTRACTABLE, true));
-            
+            objectAttributes.Add(new ObjectAttribute(CKA.CKA_WRAP, true));
+            //objectAttributes.Add(new ObjectAttribute(CKA.CKA_EXTRACTABLE, true));
+            objectAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
+            objectAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, true));
+            objectAttributes.Add(new ObjectAttribute(CKA.CKA_GOST28147PARAMS, GOST28147_params_oid));
+
             // Specify key generation mechanism
-            Mechanism mechanism = new Mechanism(CKM.CKM_DES3_KEY_GEN);
-            
+            Mechanism mechanism = new Mechanism(CKM.CKM_GOST28147_KEY_GEN);
+
             // Generate key
             return session.GenerateKey(mechanism, objectAttributes);
         }
@@ -138,43 +146,58 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
         /// <param name='privateKeyHandle'>Output parameter for private key object handle</param>
         public static void GenerateKeyPair(Session session, out ObjectHandle publicKeyHandle, out ObjectHandle privateKeyHandle)
         {
-            // The CKA_ID attribute is intended as a means of distinguishing multiple key pairs held by the same subject
-            byte[] ckaId = session.GenerateRandom(20);
+                    byte[] ckaId = session.GenerateRandom(20);
+
+                    byte[] GOST3410_params_oid = { 0x06, 0x07, 0x2a, 0x85, 0x03, 0x02, 0x02, 0x23, 0x01 };
+                    byte[] GOST3411_params_oid = { 0x06, 0x07, 0x2a, 0x85, 0x03, 0x02, 0x02, 0x1e, 0x01 };
+                    byte[] GOST28147_params_oid = { 0x06, 0x07, 0x2a, 0x85, 0x03, 0x02, 0x02, 0x1f, 0x01 };
+                    byte[] subject = { 0x06, 0x07, 0x2a };
+
+                    // Prepare attribute template of new public key
+                    List<ObjectAttribute> publicKeyAttributes = new List<ObjectAttribute>();
+                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_PUBLIC_KEY));
+                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_GOSTR3410));
+                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
+                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, false));
+                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
+                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_ID, ckaId));
+                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_WRAP, true));
+                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_VERIFY, true));
+                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOSTR3410PARAMS, GOST3410_params_oid));
+                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOSTR3411PARAMS, GOST3411_params_oid));
+                    publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOST28147PARAMS, GOST28147_params_oid));
+
+                    // Prepare attribute template of new private key
+                    List<ObjectAttribute> privateKeyAttributes = new List<ObjectAttribute>();
+                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_PRIVATE_KEY));
+                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_GOSTR3410));
+                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
+                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, true));
+                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
+                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_SUBJECT, subject));
+                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_ID, ckaId));
+                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_UNWRAP, true));
+                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_EXTRACTABLE, true));
+                    //privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_SENSITIVE, true));
+                    //privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_DECRYPT, true));
+                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_SIGN, true));
+                    //privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_UNWRAP, true));
+                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOSTR3410PARAMS, GOST3410_params_oid));
+                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOSTR3411PARAMS, GOST3411_params_oid));
+                    privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOST28147PARAMS, GOST28147_params_oid));
+
+                    // Specify key generation mechanism
+                    Mechanism mechanism = new Mechanism(CKM.CKM_GOSTR3410_KEY_PAIR_GEN);
+
+                    // Generate key pair
+                    session.GenerateKeyPair(mechanism, publicKeyAttributes, privateKeyAttributes, out publicKeyHandle, out privateKeyHandle);
+
+                
             
-            // Prepare attribute template of new public key
-            List<ObjectAttribute> publicKeyAttributes = new List<ObjectAttribute>();
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, false));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_ID, ckaId));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_ENCRYPT, true));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_VERIFY, true));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_VERIFY_RECOVER, true));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_WRAP, true));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_MODULUS_BITS, 1024));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_PUBLIC_EXPONENT, new byte[] { 0x01, 0x00, 0x01 }));
-            
-            // Prepare attribute template of new private key
-            List<ObjectAttribute> privateKeyAttributes = new List<ObjectAttribute>();
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, true));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_ID, ckaId));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_SENSITIVE, true));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_DECRYPT, true));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_SIGN, true));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_SIGN_RECOVER, true));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_UNWRAP, true));
-            
-            // Specify key generation mechanism
-            Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS_KEY_PAIR_GEN);
-            
-            // Generate key pair
-            session.GenerateKeyPair(mechanism, publicKeyAttributes, privateKeyAttributes, out publicKeyHandle, out privateKeyHandle);
         }
     }
 }
-=======
+
 /*
  *  Copyright 2012-2016 The Pkcs11Interop Project
  *
@@ -195,160 +218,4 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
  *  Written for the Pkcs11Interop project by:
  *  Jaroslav IMRICH <jimrich@jimrich.sk>
  */
-
-using Net.Pkcs11Interop.Common;
-using Net.Pkcs11Interop.HighLevelAPI;
-using System;
-using System.Collections.Generic;
-
-namespace Net.Pkcs11Interop.Tests.HighLevelAPI
-{
-    /// <summary>
-    /// Helper methods for HighLevelAPI tests.
-    /// </summary>
-    public static class Helpers
-    {
-        /// <summary>
-        /// Finds slot containing the token that matches criteria specified in Settings class
-        /// </summary>
-        /// <param name='pkcs11'>Initialized PKCS11 wrapper</param>
-        /// <returns>Slot containing the token that matches criteria</returns>
-        public static Slot GetUsableSlot(Pkcs11 pkcs11)
-        {
-            // Get list of available slots with token present
-            List<Slot> slots = pkcs11.GetSlotList(true);
-
-            if (slots != null)
-            if (slots.Count > 0) { }
-
-            // First slot with token present is OK...
-           
-                Slot matchingSlot = slots[0];
-            
-
-            // ...unless there are matching criteria specified in Settings class
-            if (Settings.TokenSerial != null || Settings.TokenLabel != null)
-            {
-                matchingSlot = null;
-
-                foreach (Slot slot in slots)
-                {
-                    TokenInfo tokenInfo = null;
-
-                    try
-                    {
-                        tokenInfo = slot.GetTokenInfo();
-                    }
-                    catch (Pkcs11Exception ex)
-                    {
-                        if (ex.RV != CKR.CKR_TOKEN_NOT_RECOGNIZED && ex.RV != CKR.CKR_TOKEN_NOT_PRESENT)
-                            throw;
-                    }
-
-                    if (tokenInfo == null)
-                        continue;
-
-                    if (!string.IsNullOrEmpty(Settings.TokenSerial))
-                        if (0 != string.Compare(Settings.TokenSerial, tokenInfo.SerialNumber, StringComparison.Ordinal))
-                            continue;
-
-                    if (!string.IsNullOrEmpty(Settings.TokenLabel))
-                        if (0 != string.Compare(Settings.TokenLabel, tokenInfo.Label, StringComparison.Ordinal))
-                            continue;
-
-                    matchingSlot = slot;
-                    break;
-                }
-            }
-
-            if (matchingSlot != null) { }
-            return matchingSlot;
-        }
-
-        /// <summary>
-        /// Creates the data object.
-        /// </summary>
-        /// <param name='session'>Read-write session with user logged in</param>
-        /// <returns>Object handle</returns>
-        public static ObjectHandle CreateDataObject(Session session)
-        {
-            // Prepare attribute template of new data object
-            List<ObjectAttribute> objectAttributes = new List<ObjectAttribute>();
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_DATA));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_APPLICATION, Settings.ApplicationName));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_VALUE, "Data object content"));
-            
-            // Create object
-            return session.CreateObject(objectAttributes);
-        }
-
-        /// <summary>
-        /// Generates symetric key.
-        /// </summary>
-        /// <param name='session'>Read-write session with user logged in</param>
-        /// <returns>Object handle</returns>
-        public static ObjectHandle GenerateKey(Session session)
-        {
-            // Prepare attribute template of new key
-            List<ObjectAttribute> objectAttributes = new List<ObjectAttribute>();
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_SECRET_KEY));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_DES3));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_ENCRYPT, true));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_DECRYPT, true));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_DERIVE, true));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_EXTRACTABLE, true));
-            
-            // Specify key generation mechanism
-            Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS_KEY_PAIR_GEN);
-            
-            // Generate key
-            return session.GenerateKey(mechanism, objectAttributes);
-        }
-
-        /// <summary>
-        /// Generates asymetric key pair.
-        /// </summary>
-        /// <param name='session'>Read-write session with user logged in</param>
-        /// <param name='publicKeyHandle'>Output parameter for public key object handle</param>
-        /// <param name='privateKeyHandle'>Output parameter for private key object handle</param>
-        public static void GenerateKeyPair(Session session, out ObjectHandle publicKeyHandle, out ObjectHandle privateKeyHandle)
-        {
-            // The CKA_ID attribute is intended as a means of distinguishing multiple key pairs held by the same subject
-            byte[] ckaId = session.GenerateRandom(20);
-            
-            // Prepare attribute template of new public key
-            List<ObjectAttribute> publicKeyAttributes = new List<ObjectAttribute>();
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, false));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_ID, ckaId));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_ENCRYPT, true));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_VERIFY, true));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_VERIFY_RECOVER, true));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_WRAP, true));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_MODULUS_BITS, 1024));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_PUBLIC_EXPONENT, new byte[] { 0x01, 0x00, 0x01 }));
-            
-            // Prepare attribute template of new private key
-            List<ObjectAttribute> privateKeyAttributes = new List<ObjectAttribute>();
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, true));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_ID, ckaId));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_SENSITIVE, true));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_DECRYPT, true));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_SIGN, true));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_SIGN_RECOVER, true));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_UNWRAP, true));
-            
-            // Specify key generation mechanism
-            Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS_KEY_PAIR_GEN);
-            
-            // Generate key pair
-            session.GenerateKeyPair(mechanism, publicKeyAttributes, privateKeyAttributes, out publicKeyHandle, out privateKeyHandle);
-        }
-    }
-}
->>>>>>> origin/master:src/Pkcs11Interop/ConsoleApplication1/Helpers.cs
+ 

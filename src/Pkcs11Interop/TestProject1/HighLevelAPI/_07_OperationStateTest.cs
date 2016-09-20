@@ -33,7 +33,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
         /// <summary>
         /// Basic GetOperationState and SetOperationState test.
         /// </summary>
-        [TestMethod]
+        /*[TestMethod]
         public void _01_BasicOperationStateTest()
         {
             using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, Settings.UseOsLocking))
@@ -55,7 +55,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                     session.SetOperationState(state, new ObjectHandle(), new ObjectHandle());
                 }
             }
-        }
+        }*/
     }
 }
 

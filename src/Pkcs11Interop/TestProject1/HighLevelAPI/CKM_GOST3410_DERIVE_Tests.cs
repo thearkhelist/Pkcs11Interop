@@ -1,45 +1,22 @@
-/*
- *  Copyright 2012-2016 The Pkcs11Interop Project
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-
-/*
- *  Written for the Pkcs11Interop project by:
- *  Jaroslav IMRICH <jimrich@jimrich.sk>
- */
-
-using Net.Pkcs11Interop.Common;
-using Net.Pkcs11Interop.HighLevelAPI;
-using Net.Pkcs11Interop.HighLevelAPI.MechanismParams;
+﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Net.Pkcs11Interop.HighLevelAPI;
+using Net.Pkcs11Interop.Tests.HighLevelAPI;
+using Net.Pkcs11Interop.Tests;
 using System.Collections.Generic;
+using Net.Pkcs11Interop.Common;
+using Net.Pkcs11Interop.HighLevelAPI.MechanismParams;
+using Net.Pkcs11Interop.LowLevelAPI40;
 
-namespace Net.Pkcs11Interop.Tests.HighLevelAPI
+namespace TestProject1.HighLevelAPI
 {
-    /// <summary>
-    /// DeriveKey tests.
-    /// </summary>
     [TestClass]
-    public class _25_DeriveKeyTest
+    public class CKM_GOST3410_DERIVE_Tests
     {
-        /// <summary>
-        /// DeriveKey test.
-        /// </summary>
-        /*[TestMethod]
+        [TestMethod]
         public void _01_BasicDeriveKeyTest()
         {
-            using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, Settings.UseOsLocking))
+            using (Net.Pkcs11Interop.HighLevelAPI.Pkcs11 pkcs11 = new Net.Pkcs11Interop.HighLevelAPI.Pkcs11(Settings.Pkcs11LibraryPath, Settings.UseOsLocking))
             {
                 // Find first slot with token present
                 Slot slot = Helpers.GetUsableSlot(pkcs11);
@@ -71,8 +48,8 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                     CkGOST3410DeriveParams mechanismParams = new CkGOST3410DeriveParams(ukm, data);
 
                     // Specify derivation mechanism with parameters
-                    Mechanism mechanism = new Mechanism(CKM.CKM_GOSTR3410_DERIVE,mechanismParams);
-                    
+                    Mechanism mechanism = new Mechanism(CKM.CKM_GOSTR3410_DERIVE, mechanismParams);
+
 
                     objectAttributes = new List<ObjectAttribute>();
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_SECRET_KEY));
@@ -83,7 +60,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, true));
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_EXTRACTABLE, true));
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_SENSITIVE, false));
-                   
+
                     // Derive key
                     ObjectHandle derivedKey = session.DeriveKey(mechanism, privateKey, objectAttributes);
 
@@ -95,7 +72,6 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                     session.Logout();
                 }
             }
-        }*/
+        }
     }
 }
-

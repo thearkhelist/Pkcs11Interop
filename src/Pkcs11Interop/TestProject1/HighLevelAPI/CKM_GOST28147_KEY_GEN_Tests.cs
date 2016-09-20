@@ -1,36 +1,15 @@
-/*
- *  Copyright 2012-2016 The Pkcs11Interop Project
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-
-/*
- *  Written for the Pkcs11Interop project by:
- *  Jaroslav IMRICH <jimrich@jimrich.sk>
- */
-
-using System.Collections.Generic;
-using Net.Pkcs11Interop.Common;
-using Net.Pkcs11Interop.HighLevelAPI;
+﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Net.Pkcs11Interop.HighLevelAPI;
+using Net.Pkcs11Interop.Tests;
+using Net.Pkcs11Interop.Tests.HighLevelAPI;
+using Net.Pkcs11Interop.Common;
+using System.Collections.Generic;
 
-namespace Net.Pkcs11Interop.Tests.HighLevelAPI
+namespace TestProject1.HighLevelAPI
 {
-    /// <summary>
-    /// GenerateKey and GenerateKeyPair tests.
-    /// </summary>
     [TestClass]
-    public class _32_GenerateKeyAndKeyPairTest_GOST28147
+    public class CKM_GOST28147_KEY_GEN_Tests
     {
         /// <summary>
         /// GenerateKey test.
@@ -42,19 +21,27 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
             {
                 // Find first slot with token present
                 Slot slot = Helpers.GetUsableSlot(pkcs11);
-                
+
                 // Open RW session
                 using (Session session = slot.OpenSession(false))
                 {
                     // Login as normal user
+
                     session.Login(CKU.CKU_USER, Settings.NormalUserPin);
 
-                    // Prepare attribute template of new key
+
+                    byte[] ckaId = session.GenerateRandom(20);
+                    byte[] GOST28147_params_oid = { 0x06, 0x07, 0x2a, 0x85, 0x03, 0x02, 0x02, 0x1f, 0x01 };                    // Prepare attribute template of new key
                     List<ObjectAttribute> objectAttributes = new List<ObjectAttribute>();
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_SECRET_KEY));
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_GOST28147));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_ID, ckaId));
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_ENCRYPT, true));
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_DECRYPT, true));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, true));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_GOST28147PARAMS, GOST28147_params_oid));
 
                     // Specify key generation mechanism
                     Mechanism mechanism = new Mechanism(CKM.CKM_GOST28147_KEY_GEN);
@@ -66,11 +53,10 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
 
                     // Destroy object
                     session.DestroyObject(objectHandle);
-                    
+
                     session.Logout();
                 }
             }
         }
     }
 }
-

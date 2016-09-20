@@ -19,35 +19,42 @@
  *  Jaroslav IMRICH <jimrich@jimrich.sk>
  */
 
-namespace Net.Pkcs11Interop.Common
+using Net.Pkcs11Interop.HighLevelAPI;
+using System;
+using System.Runtime.InteropServices;
+
+namespace Net.Pkcs11Interop.LowLevelAPI41.MechanismParams
 {
     /// <summary>
-    /// Key derivation functions
+    /// CK_GOST3410_KEY_WRAP_PARAMS
     /// </summary>
-    public enum CKD : uint
+    [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Unicode)]
+    public struct CK_GOST3410_KEY_WRAP_PARAMS
     {
         /// <summary>
-        /// Produces a raw shared secret value without applying any key derivation function
+        /// 
         /// </summary>
-        CKD_NULL = 0x00000001,
+        public IntPtr pWrapOID;
 
         /// <summary>
-        /// Derives keying data from the shared secret value as defined in ANSI X9.63
+        /// 
         /// </summary>
-        CKD_SHA1_KDF = 0x00000002,
+        public ulong ulWrapOIDLen;
 
         /// <summary>
-        /// Derives keying data from the shared secret value as defined in the ANSI X9.42 standard
+        /// 
         /// </summary>
-        CKD_SHA1_KDF_ASN1 = 0x00000003,
+        public IntPtr pUKM;
 
         /// <summary>
-        /// Derives keying data from the shared secret value as defined in the ANSI X9.42 standard
+        /// 
         /// </summary>
-        CKD_SHA1_KDF_CONCATENATE = 0x00000004,
+        public ulong ulUKMLen;
 
         /// <summary>
-        /// CKD_CPDIVERSIFY_KDF
+        /// 
         /// </summary>
-        CKD_CPDIVERSIFY_KDF = 0x00000009    }
+        public ulong hKey;
+
+    }
 }

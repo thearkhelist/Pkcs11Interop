@@ -55,9 +55,9 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                     Helpers.GenerateKeyPair(session, out publicKey, out privateKey);
                     
                     // Specify signing mechanism
-                    Mechanism mechanism = new Mechanism(CKM.CKM_GOST28147_MAC);
+                    Mechanism mechanism = new Mechanism(CKM.CKM_GOSTR3410);
                     
-                    byte[] sourceData = ConvertUtils.Utf8StringToBytes("Hello world");
+                    byte[] sourceData = ConvertUtils.Utf8StringToBytes("Hello world + something there123");
 
                     // Sign data
                     byte[] signature = session.Sign(mechanism, privateKey, sourceData);
@@ -80,7 +80,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
         
         /// <summary>
         /// Multi-part signing and verification test.
-        /// </summary>
+        /*/// </summary>
         [TestMethod]
         public void _02_SignAndVerifyMultiPartTest()
         {
@@ -101,7 +101,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                     Helpers.GenerateKeyPair(session, out publicKey, out privateKey);
                     
                     // Specify signing mechanism
-                    Mechanism mechanism = new Mechanism(CKM.CKM_SHA1_RSA_PKCS);
+                    Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS);
 
                     byte[] sourceData = ConvertUtils.Utf8StringToBytes("Hello world");
                     byte[] signature = null;
@@ -133,7 +133,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                     session.Logout();
                 }
             }
-        }
+        }*/
     }
 }
 

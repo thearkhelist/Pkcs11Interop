@@ -1,42 +1,17 @@
-/*
- *  Copyright 2012-2016 The Pkcs11Interop Project
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-
-/*
- *  Written for the Pkcs11Interop project by:
- *  Jaroslav IMRICH <jimrich@jimrich.sk>
- */
-
-using System;
-using System.IO;
-using Net.Pkcs11Interop.Common;
-using Net.Pkcs11Interop.HighLevelAPI;
-using Net.Pkcs11Interop.HighLevelAPI.MechanismParams;
+﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Net.Pkcs11Interop.HighLevelAPI;
+using Net.Pkcs11Interop.Common;
+using Net.Pkcs11Interop.Tests.HighLevelAPI;
+using Net.Pkcs11Interop.Tests;
+using System.Collections.Generic;
+using System.IO;
 
-namespace Net.Pkcs11Interop.Tests.HighLevelAPI
+namespace TestProject1.HighLevelAPI
 {
-    /// <summary>
-    /// Encryption and decryption tests.
-    /// </summary>
     [TestClass]
-    public class _19_EncryptAndDecryptTest
+    public class CKM_GOST28147_ECB_Tests
     {
-        /// <summary>
-        /// Single-part encryption and decryption test.
-        /// </summary>
         [TestMethod]
         public void _01_EncryptAndDecryptSinglePartTest()
         {
@@ -44,7 +19,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
             {
                 // Find first slot with token present
                 Slot slot = Helpers.GetUsableSlot(pkcs11);
-                
+
                 // Open RW session
                 using (Session session = slot.OpenSession(false))
                 {
@@ -58,7 +33,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                     byte[] iv = session.GenerateRandom(8);
 
                     // Specify encryption mechanism with initialization vector as parameter
-                    Mechanism mechanism = new Mechanism(CKM.CKM_GOST28147, iv);
+                    Mechanism mechanism = new Mechanism(CKM.CKM_GOST28147_ECB, iv);
 
                     byte[] sourceData = ConvertUtils.Utf8StringToBytes("Our new password");
 
@@ -66,7 +41,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                     byte[] encryptedData = session.Encrypt(mechanism, generatedKey, sourceData);
 
                     // Do something interesting with encrypted data
-                    
+
                     // Decrypt data
                     byte[] decryptedData = session.Decrypt(mechanism, generatedKey, encryptedData);
 
@@ -79,36 +54,33 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
             }
         }
 
-        /// <summary>
-        /// Multi-part encryption and decryption test.
-        /// </summary>
-        /*[TestMethod]
+        [TestMethod]
         public void _02_EncryptAndDecryptMultiPartTest()
         {
             using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, Settings.UseOsLocking))
             {
                 // Find first slot with token present
                 Slot slot = Helpers.GetUsableSlot(pkcs11);
-                
+
                 // Open RW session
                 using (Session session = slot.OpenSession(false))
                 {
                     // Login as normal user
                     session.Login(CKU.CKU_USER, Settings.NormalUserPin);
-                    
+
                     // Generate symetric key
                     ObjectHandle generatedKey = Helpers.GenerateKey(session);
-                    
+
                     // Generate random initialization vector
                     byte[] iv = session.GenerateRandom(8);
-                    
+
                     // Specify encryption mechanism with initialization vector as parameter
-                    Mechanism mechanism = new Mechanism(CKM.CKM_GOST28147, iv);
+                    Mechanism mechanism = new Mechanism(CKM.CKM_GOST28147_ECB, iv);
 
                     byte[] sourceData = ConvertUtils.Utf8StringToBytes("Our new password");
                     byte[] encryptedData = null;
                     byte[] decryptedData = null;
-                    
+
                     // Multipart encryption can be used i.e. for encryption of streamed data
                     using (MemoryStream inputStream = new MemoryStream(sourceData), outputStream = new MemoryStream())
                     {
@@ -119,9 +91,9 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                         // Read whole output stream to the byte array so we can compare results more easily
                         encryptedData = outputStream.ToArray();
                     }
-                    
+
                     // Do something interesting with encrypted data
-                    
+
                     // Multipart decryption can be used i.e. for decryption of streamed data
                     using (MemoryStream inputStream = new MemoryStream(encryptedData), outputStream = new MemoryStream())
                     {
@@ -132,7 +104,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                         // Read whole output stream to the byte array so we can compare results more easily
                         decryptedData = outputStream.ToArray();
                     }
-                    
+
                     // Do something interesting with decrypted data
                     Assert.IsTrue(Convert.ToBase64String(sourceData) == Convert.ToBase64String(decryptedData));
 
@@ -141,53 +113,81 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                 }
             }
         }
-        */
-        /// <summary>
-        /// Single-part encryption and decryption test with CKM_RSA_PKCS_OAEP mechanism.
-        /// </summary>
-        /*[TestMethod]
-        public void _03_EncryptAndDecryptSinglePartOaepTest()
+
+
+        [TestMethod]
+        public void _03_BasicWrapAndUnwrapKeyTest()
         {
             using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, Settings.UseOsLocking))
             {
                 // Find first slot with token present
                 Slot slot = Helpers.GetUsableSlot(pkcs11);
-                
+
                 // Open RW session
                 using (Session session = slot.OpenSession(false))
                 {
                     // Login as normal user
                     session.Login(CKU.CKU_USER, Settings.NormalUserPin);
 
-                    // Generate key pair
-                    ObjectHandle publicKey = null;
-                    ObjectHandle privateKey = null;
-                    Helpers.GenerateKeyPair(session, out publicKey, out privateKey);
+                    byte[] param = session.GenerateRandom(8);
+                    byte[] GOST28147_params_oid = { 0x06, 0x07, 0x2a, 0x85, 0x03, 0x02, 0x02, 0x1f, 0x01 };                    // Prepare attribute template of new key
+                    byte[] data = session.GenerateRandom(32);
 
-                    // Specify mechanism parameters
-                    CkRsaPkcsOaepParams mechanismParams = new CkRsaPkcsOaepParams((ulong)CKM.CKM_SHA_1, (ulong)CKG.CKG_MGF1_SHA1, (ulong)CKZ.CKZ_DATA_SPECIFIED, null);
+                    List<ObjectAttribute> objectAttributes = new List<ObjectAttribute>();
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_SECRET_KEY));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_GOST28147));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, false));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_MODIFIABLE, true));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, true));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_SENSITIVE, false));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_WRAP, true));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_GOST28147PARAMS, GOST28147_params_oid));
 
-                    // Specify encryption mechanism with parameters
-                    Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS_OAEP, mechanismParams);
-                    
-                    byte[] sourceData = ConvertUtils.Utf8StringToBytes("Hello world");
-                    
-                    // Encrypt data
-                    byte[] encryptedData = session.Encrypt(mechanism, publicKey, sourceData);
-                    
-                    // Do something interesting with encrypted data
-                    
-                    // Decrypt data
-                    byte[] decryptedData = session.Decrypt(mechanism, privateKey, encryptedData);
-                    
-                    // Do something interesting with decrypted data
-                    Assert.IsTrue(Convert.ToBase64String(sourceData) == Convert.ToBase64String(decryptedData));
-                    
-                    session.DestroyObject(privateKey);
-                    session.DestroyObject(publicKey);
+                    Mechanism mechanism = new Mechanism(CKM.CKM_GOST28147_KEY_GEN);
+                    ObjectHandle tempKey = session.GenerateKey(mechanism, objectAttributes);
+                    // Generate key
+
+                    ObjectHandle key = Helpers.GenerateKey(session);
+                    List<ObjectAttribute> changeObjectAttributes = new List<ObjectAttribute>();
+                    changeObjectAttributes.Add(new ObjectAttribute(CKA.CKA_EXTRACTABLE, true));
+                    session.SetAttributeValue(tempKey, changeObjectAttributes);
+                    session.SetAttributeValue(key, changeObjectAttributes);
+
+                    mechanism = new Mechanism(CKM.CKM_GOST28147_ECB);
+
+                    // Wrap key
+                    byte[] wrappedKey = session.WrapKey(mechanism, key, tempKey);
+
+                    // Do something interesting with wrapped key
+                    Assert.IsNotNull(wrappedKey);
+
+                    // Define attributes for unwrapped key
+                    objectAttributes = new List<ObjectAttribute>();
+                    //objectAttributes.Add(new ObjectAttribute(CKA.CKA_UNWRAP, true));
+
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_SECRET_KEY));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_GOST28147));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, false));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_MODIFIABLE, true));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, true));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_SENSITIVE, false));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_UNWRAP, true));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_GOST28147PARAMS, GOST28147_params_oid));
+
+                    // Unwrap key
+                    ObjectHandle unwrappedKey = session.UnwrapKey(mechanism, key, wrappedKey, objectAttributes);
+
+                    // Do something interesting with unwrapped key
+                    Assert.IsTrue(unwrappedKey.ObjectId != CK.CK_INVALID_HANDLE);
+
+                    session.DestroyObject(key);
+                    session.DestroyObject(unwrappedKey);
+                    session.DestroyObject(tempKey);
                     session.Logout();
                 }
             }
-        }*/
+        }
     }
 }

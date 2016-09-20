@@ -48,7 +48,9 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
+          <Private>False</Private>
+        </Reference>
       </ItemGroup>
     </Otherwise>
   </Choose>
@@ -58,6 +60,20 @@
     <Compile Include="Common\_02_CustomExceptionsTest.cs" />
     <Compile Include="ExtensionAttribute.cs" />
     <Compile Include="HighLevelAPI\Helpers.cs" />
+    <Compile Include="HighLevelAPI\CKM_RSA_PKCS_KEY_PAIR_GEN_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_RSA_PKCS_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOST28147_KEY_GEN_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOST28147_ECB_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOST28147_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOSTR3410_KEY_PAIR_GEN_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOSTR3410_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOSTR3410_WITH_GOSTR3411_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOST28147_MAC_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOST28147_KEY_WRAP_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOST3411_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOST3411_HMAC_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOST3410_KEY_WRAP_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOST3410_DERIVE_Tests.cs" />
     <Compile Include="HighLevelAPI\_01_InitializeTest.cs" />
     <Compile Include="HighLevelAPI\_02_GetInfoTest.cs" />
     <Compile Include="HighLevelAPI\_03_SlotListInfoAndEventTest.cs" />
@@ -75,19 +91,12 @@
     <Compile Include="HighLevelAPI\_15_CreateCopyDestroyObjectTest.cs" />
     <Compile Include="HighLevelAPI\_16_GetAndSetAttributeValueTest.cs" />
     <Compile Include="HighLevelAPI\_17_ObjectFindingTest.cs" />
-    <Compile Include="HighLevelAPI\_32_GenerateKeyTest_GOST28147.cs" />
-    <Compile Include="HighLevelAPI\_31_GenerateKeyAndKeyPairTest_RSA.cs" />
     <Compile Include="HighLevelAPI\_18_GenerateKeyAndKeyPairTest.cs" />
     <Compile Include="HighLevelAPI\_19_EncryptAndDecryptTest.cs" />
     <Compile Include="HighLevelAPI\_20_SignAndVerifyTest.cs" />
-    <Compile Include="HighLevelAPI\_21_SignAndVerifyRecoverTest.cs" />
-    <Compile Include="HighLevelAPI\_22_DigestEncryptAndDecryptDigestTest.cs" />
-    <Compile Include="HighLevelAPI\_23_SignEncryptAndDecryptVerifyTest.cs" />
     <Compile Include="HighLevelAPI\_24_WrapAndUnwrapKeyTest.cs" />
     <Compile Include="HighLevelAPI\_25_DeriveKeyTest.cs" />
     <Compile Include="HighLevelAPI\_26_LegacyParallelFunctionsTest.cs" />
-    <Compile Include="HighLevelAPI\_27b_Pkcs11UriUtilsTest.cs" />
-    <Compile Include="HighLevelAPI\_27_Pkcs11UriUtilsTest.cs" />
     <Compile Include="HighLevelAPI\_28_Pkcs11ClassExtensionTest.cs" />
     <Compile Include="HighLevelAPI\_29_SlotClassExtensionTest.cs" />
     <Compile Include="HighLevelAPI\_30_SessionClassExtensionTest.cs" />

@@ -34,7 +34,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
         /// <summary>
         /// GetFunctionStatus test.
         /// </summary>
-        [TestMethod]
+        /*[TestMethod]
         public void _01_GetFunctionStatusTest()
         {
             using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, Settings.UseOsLocking))
@@ -58,12 +58,12 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                 }
             }
         }
-        
+        */
         /// <summary>
         /// CancelFunction test.
         /// </summary>
-        [TestMethod]
-        public void _02_CancelFunctionTest()
+        /*[TestMethod]
+        /*public void _02_CancelFunctionTest()
         {
             using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, Settings.UseOsLocking))
             {
@@ -84,6 +84,8 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                     }
                 }
             }
-        }
+         }*/
+
+        
     }
 }

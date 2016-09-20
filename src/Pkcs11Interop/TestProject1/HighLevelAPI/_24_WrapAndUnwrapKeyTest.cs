@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Net.Pkcs11Interop.HighLevelAPI.MechanismParams;
 
 namespace Net.Pkcs11Interop.Tests.HighLevelAPI
 {
@@ -35,7 +36,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
         /// <summary>
         /// Basic WrapKey and UnwrapKey test.
         /// </summary>
-        [TestMethod]
+        /*[TestMethod]
         public void _01_BasicWrapAndUnwrapKeyTest()
         {
             using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, Settings.UseOsLocking))
@@ -52,28 +53,55 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                     // Generate asymetric key pair
                     ObjectHandle publicKey = null;
                     ObjectHandle privateKey = null;
-                    Helpers.GenerateKeyPair(session, out publicKey, out privateKey);
+                    //Helpers.GenerateKeyPair(session, out publicKey, out privateKey);
+
                     
-                    // Generate symetric key
-                    ObjectHandle secretKey = Helpers.GenerateKey(session);
+                        byte[] ckaId = session.GenerateRandom(20);
+                        byte[] GOST28147_params_oid = { 0x06, 0x07, 0x2a, 0x85, 0x03, 0x02, 0x02, 0x1f, 0x01 };                    // Prepare attribute template of new key
+                        List<ObjectAttribute> objectAttributes = new List<ObjectAttribute>();
+                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_SECRET_KEY));
+                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_GOST28147));
+                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
+                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_ID, ckaId));
+                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_ENCRYPT, true));
+                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_DECRYPT, true));
+                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_WRAP, true));
+                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
+                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, true));
+                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_GOST28147PARAMS, GOST28147_params_oid));
+
+                        // Specify key generation mechanism
+                        Mechanism mechanism = new Mechanism(CKM.CKM_GOST28147_KEY_GEN);
+
+                        // Generate key
+                        ObjectHandle secretKey =  session.GenerateKey(mechanism, objectAttributes);
+                    ObjectHandle key = session.GenerateKey(mechanism, objectAttributes);
+                        
+                    
+
+                    byte[] data = session.GenerateRandom(24);
+                    byte[] ukm = session.GenerateRandom(8);
+
+                    //CkGOST3410KeyWrapParams mechanismParams = new CkGOST3410KeyWrapParams(publicKey, ukm, data);
 
                     // Specify wrapping mechanism
-                    Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS);
-
+                    mechanism = new Mechanism(CKM.CKM_GOST28147_KEY_WRAP,ukm);
+                    
                     // Wrap key
-                    byte[] wrappedKey = session.WrapKey(mechanism, publicKey, secretKey);
+                    byte[] wrappedKey = session.WrapKey(mechanism, key, secretKey);
 
                     // Do something interesting with wrapped key
                     Assert.IsNotNull(wrappedKey);
 
                     // Define attributes for unwrapped key
-                    List<ObjectAttribute> objectAttributes = new List<ObjectAttribute>();
+                    objectAttributes = new List<ObjectAttribute>();
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_SECRET_KEY));
-                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_DES3));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_GOST28147));
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_ENCRYPT, true));
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_DECRYPT, true));
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_DERIVE, true));
                     objectAttributes.Add(new ObjectAttribute(CKA.CKA_EXTRACTABLE, true));
+                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_UNWRAP, true));
 
                     // Unwrap key
                     ObjectHandle unwrappedKey = session.UnwrapKey(mechanism, privateKey, wrappedKey, objectAttributes);
@@ -87,7 +115,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                     session.Logout();
                 }
             }
-        }
+        }*/
     }
 }
 

@@ -108,7 +108,10 @@ namespace Net.Pkcs11Interop.LowLevelAPI41
 
             CK_MECHANISM ckMechanism = new CK_MECHANISM();
             ckMechanism.Mechanism = mechanism;
-            ckMechanism.ParameterLen = Convert.ToUInt32(UnmanagedMemory.SizeOf(parameterStructure.GetType()));
+            Type t1 = parameterStructure.GetType();
+            int t2 = UnmanagedMemory.SizeOf(t1);
+            //t2 = sizeof(int);
+            ckMechanism.ParameterLen = Convert.ToUInt32(t2);
             ckMechanism.Parameter = UnmanagedMemory.Allocate(Convert.ToInt32(ckMechanism.ParameterLen));
             UnmanagedMemory.Write(ckMechanism.Parameter, parameterStructure);
 

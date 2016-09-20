@@ -19,35 +19,42 @@
  *  Jaroslav IMRICH <jimrich@jimrich.sk>
  */
 
-namespace Net.Pkcs11Interop.Common
+using System;
+using System.Runtime.InteropServices;
+
+namespace Net.Pkcs11Interop.LowLevelAPI81.MechanismParams
 {
     /// <summary>
-    /// Key derivation functions
+    /// Provides the parameters for the CK_GOST3410_DERIVE_PARAMS
     /// </summary>
-    public enum CKD : uint
+    [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Unicode)]
+    public struct CK_GOST3410_DERIVE_PARAMS
     {
         /// <summary>
-        /// Produces a raw shared secret value without applying any key derivation function
+        /// pointer to data with public key of a receiver
         /// </summary>
-        CKD_NULL = 0x00000001,
+        public IntPtr pPublicData;
 
         /// <summary>
-        /// Derives keying data from the shared secret value as defined in ANSI X9.63
+        /// pointer to a UKM data
         /// </summary>
-        CKD_SHA1_KDF = 0x00000002,
+        public IntPtr pUKM;
 
         /// <summary>
-        /// Derives keying data from the shared secret value as defined in the ANSI X9.42 standard
+        /// length of data with public key of a receiver (must be 64)
         /// </summary>
-        CKD_SHA1_KDF_ASN1 = 0x00000003,
+        public ulong ulPublicDataLen;
 
         /// <summary>
-        /// Derives keying data from the shared secret value as defined in the ANSI X9.42 standard
+        /// length of UKM data in bytes (must be 8)
         /// </summary>
-        CKD_SHA1_KDF_CONCATENATE = 0x00000004,
+        public ulong ulUkmLen;
 
         /// <summary>
-        /// CKD_CPDIVERSIFY_KDF
+        /// identifier of the key derivation function
         /// </summary>
-        CKD_CPDIVERSIFY_KDF = 0x00000009    }
+        public ulong kdf;
+
+
+    }
 }

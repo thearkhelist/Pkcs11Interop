@@ -798,9 +798,9 @@ namespace Net.Pkcs11Interop.HighLevelAPI41
                 throw new Pkcs11Exception("C_EncryptFinal", rv);
 
             lastEncryptedPart = new byte[lastEncryptedPartLen];
-            rv = _p11.C_EncryptFinal(_sessionId, lastEncryptedPart, ref lastEncryptedPartLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_EncryptFinal", rv);
+            //rv = _p11.C_EncryptFinal(_sessionId, lastEncryptedPart, ref lastEncryptedPartLen);
+            //if (rv != CKR.CKR_OK)
+            //    throw new Pkcs11Exception("C_EncryptFinal", rv);
 
             if (lastEncryptedPartLen > 0)
                 outputStream.Write(lastEncryptedPart, 0, Convert.ToInt32(lastEncryptedPartLen));
@@ -931,10 +931,10 @@ namespace Net.Pkcs11Interop.HighLevelAPI41
             if (rv != CKR.CKR_OK)
                 throw new Pkcs11Exception("C_DecryptFinal", rv);
 
-            lastPart = new byte[lastPartLen];
-            rv = _p11.C_DecryptFinal(_sessionId, lastPart, ref lastPartLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DecryptFinal", rv);
+            //lastPart = new byte[lastPartLen];
+            //rv = _p11.C_DecryptFinal(_sessionId, lastPart, ref lastPartLen);
+            //if (rv != CKR.CKR_OK)
+            //    throw new Pkcs11Exception("C_DecryptFinal", rv);
 
             if (lastPartLen > 0)
                 outputStream.Write(lastPart, 0, Convert.ToInt32(lastPartLen));
@@ -2177,6 +2177,8 @@ namespace Net.Pkcs11Interop.HighLevelAPI41
         /// <param name="wrappingKeyHandle">Handle of wrapping key</param>
         /// <param name="keyHandle">Handle of key to be wrapped</param>
         /// <returns>Wrapped key</returns>
+        /// 
+
         public byte[] WrapKey(Mechanism mechanism, ObjectHandle wrappingKeyHandle, ObjectHandle keyHandle)
         {
             if (this._disposed)
@@ -2194,22 +2196,19 @@ namespace Net.Pkcs11Interop.HighLevelAPI41
             CK_MECHANISM ckMechanism = mechanism.CkMechanism;
 
             uint wrappedKeyLen = 0;
-            Console.Write("C_WrapKey: ");
             CKR rv = _p11.C_WrapKey(_sessionId, ref ckMechanism, wrappingKeyHandle.ObjectId, keyHandle.ObjectId, null, ref wrappedKeyLen);
             if (rv != CKR.CKR_OK)
-            {
-                Console.WriteLine("-> {0}", rv);
+            {              
                 throw new Pkcs11Exception("C_WrapKey", rv);
             }
             byte[] wrappedKey = new byte[wrappedKeyLen];
-            Console.Write("C_WrapKey: ");
+            
+            //byte[] wrappedKey = new byte[wrappedKeyLen];
             rv = _p11.C_WrapKey(_sessionId, ref ckMechanism, wrappingKeyHandle.ObjectId, keyHandle.ObjectId, wrappedKey, ref wrappedKeyLen);
             if (rv != CKR.CKR_OK)
             {
-                Console.WriteLine("-> {0}", rv);
                 throw new Pkcs11Exception("C_WrapKey", rv);
             }
-            Console.WriteLine("-> {0}", rv);
             if (wrappedKey.Length != wrappedKeyLen)
                 Array.Resize(ref wrappedKey, Convert.ToInt32(wrappedKeyLen));
 
@@ -2283,6 +2282,8 @@ namespace Net.Pkcs11Interop.HighLevelAPI41
             CK_MECHANISM ckMechanism = mechanism.CkMechanism;
 
             CK_ATTRIBUTE[] template = null;
+            //ckMechanism.Parameter = (IntPtr) 0x0011b484;
+            //ckMechanism.ParameterLen = 0x00000014;
             uint templateLen = 0;
             if (attributes != null)
             {

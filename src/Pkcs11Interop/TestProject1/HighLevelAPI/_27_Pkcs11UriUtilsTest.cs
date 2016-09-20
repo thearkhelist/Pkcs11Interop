@@ -121,7 +121,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                         throw new Exception("None of the private keys match PKCS#11 URI");
 
                     // Create signature with the private key specified by URI
-                    return session.Sign(new Mechanism(CKM.CKM_SHA1_RSA_PKCS), foundObjects[0], data);
+                    return session.Sign(new Mechanism(CKM.CKM_GOSTR3410), foundObjects[0], data);
                 }
             }
         }

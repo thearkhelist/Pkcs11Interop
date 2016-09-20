@@ -57,6 +57,21 @@ namespace Net.Pkcs11Interop.Common
         CKA_VALUE = 0x00000011,
 
         /// <summary>
+        /// CKA_GOSTR3410PARAMS [byte array]
+        /// </summary>
+        CKA_GOSTR3410PARAMS = 0x00000250,
+
+        /// <summary>
+        /// CKA_GOSTR3411PARAMS [byte array]
+        /// </summary>
+        CKA_GOSTR3411PARAMS = 0x00000251,
+
+        /// <summary>
+        /// CKA_GOST28147PARAMS [byte array]
+        /// </summary>
+        CKA_GOST28147PARAMS = 0x00000252,
+
+        /// <summary>
         /// DER-encoding of the object identifier indicating the data object type [byte array]
         /// </summary>
         CKA_OBJECT_ID = 0x00000012,

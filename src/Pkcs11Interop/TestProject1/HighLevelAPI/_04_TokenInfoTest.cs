@@ -45,8 +45,10 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                 // Get token info
                 TokenInfo tokenInfo = slot.GetTokenInfo();
 
+                Console.WriteLine(tokenInfo.TokenFlags.DualCryptoOperations);
                 // Do something interesting with token info
                 Assert.IsFalse(String.IsNullOrEmpty(tokenInfo.ManufacturerId));
+
             }
         }
     }
