@@ -50,7 +50,7 @@ namespace TestProject1.HighLevelAPI
                     ObjectHandle objectHandle = session.GenerateKey(mechanism, objectAttributes);
 
                     // Do something interesting with generated key
-
+                    ulong tmp = session.GetObjectSize(objectHandle);
                     // Destroy object
                     session.DestroyObject(objectHandle);
 

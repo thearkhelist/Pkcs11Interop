@@ -199,7 +199,24 @@ namespace Net.Pkcs11Interop.Common
         /// <summary>
         /// Permanently reserved for token vendors
         /// </summary>
-        CKK_VENDOR_DEFINED = 0x80000000
+        CKK_VENDOR_DEFINED = 0x80000000,
+
+        /// <summary>
+        /// NSSCK_VENDOR_PKCS11_RU_TEAM
+        /// </summary>
+        NSSCK_VENDOR_PKCS11_RU_TEAM = (CKK_VENDOR_DEFINED | 0x54321000),
+
+        /// <summary>
+        /// CK_VENDOR_PKCS11_RU_TEAM_TK26
+        /// </summary>
+        CK_VENDOR_PKCS11_RU_TEAM_TK26 = NSSCK_VENDOR_PKCS11_RU_TEAM,
+
+        /// <summary>
+        /// CKK_GOSTR3410_512
+        /// </summary>
+        CKK_GOSTR3410_512 = (CK_VENDOR_PKCS11_RU_TEAM_TK26 | 0x003)
+
+
 
 
     }

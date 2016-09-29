@@ -10,7 +10,7 @@ using Net.Pkcs11Interop.Tests;
 namespace TestProject1.HighLevelAPI
 {
     [TestClass]
-    public class CKM_GOST3410_KEY_WRAP
+    public class CKM_GOSTR3410_KEY_WRAP
     {
         /*[TestMethod]
         public void _01_BasicWrapAndUnwrapKeyTest()

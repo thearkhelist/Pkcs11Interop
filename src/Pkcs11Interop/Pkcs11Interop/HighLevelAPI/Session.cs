@@ -213,6 +213,54 @@ namespace Net.Pkcs11Interop.HighLevelAPI
         }
 
         /// <summary>
+        /// Sets new token name
+        /// </summary>
+        public void SetTokenName(string tokenName)
+        {
+            if (this._disposed)
+                throw new ObjectDisposedException(this.GetType().FullName);
+
+            if (Platform.UnmanagedLongSize == 4)
+            {
+                if (Platform.StructPackingSize == 0)
+                   _session40.SetTokenName(tokenName);
+                else
+                    _session41.SetTokenName(tokenName);
+            }
+            /*else
+            {
+                if (Platform.StructPackingSize == 0)
+                    _session80.SetTokenName(tokenName);
+                else
+                    _session81.CloseSession();
+            }*/
+        }
+
+        /// <summary>
+        /// Sets new token name
+        /// </summary>
+        public string GetTokenName()
+        {
+            if (this._disposed)
+                throw new ObjectDisposedException(this.GetType().FullName);
+
+            //if (Platform.UnmanagedLongSize == 4)
+            //{
+              if (Platform.StructPackingSize == 0)
+                return _session40.GetTokenName();
+              else
+                return _session41.GetTokenName();
+            // }
+            //else
+            //{
+            //    if (Platform.StructPackingSize == 0)
+            //        _session80.CloseSession();
+            //    else
+            //         _session81.CloseSession();
+            //  }
+        }
+
+        /// <summary>
         /// Initializes the normal user's PIN
         /// </summary>
         /// <param name="userPin">Pin value</param>
@@ -313,6 +361,58 @@ namespace Net.Pkcs11Interop.HighLevelAPI
                     _session81.SetPin(oldPin, newPin);
             }
         }
+
+        /// <summary>
+        /// Sets lincense
+        /// </summary>
+        /// <param name="license">License</param>
+        public void SetLicense(byte[] license)
+        {
+            if (this._disposed)
+                throw new ObjectDisposedException(this.GetType().FullName);
+
+            //if (Platform.UnmanagedLongSize == 4)
+            //{
+                //if (Platform.StructPackingSize == 0)
+                //    _session40.SetPin(oldPin, newPin);
+               // else
+                    _session41.SetLicense(license);
+           // }
+           // else
+            //{
+            //    if (Platform.StructPackingSize == 0)
+            //        _session80.SetPin(oldPin, newPin);
+            //    else
+            //        _session81.SetPin(oldPin, newPin);
+           // }
+        }
+
+
+        /// <summary>
+        /// Gets lincense
+        /// </summary>
+        /// <param name="license">License</param>
+        public void GetLicense(byte[] license)
+        {
+            if (this._disposed)
+                throw new ObjectDisposedException(this.GetType().FullName);
+
+            //if (Platform.UnmanagedLongSize == 4)
+            //{
+            //if (Platform.StructPackingSize == 0)
+            //    _session40.SetPin(oldPin, newPin);
+            // else
+            _session41.GetLicense(license);
+            // }
+            // else
+            //{
+            //    if (Platform.StructPackingSize == 0)
+            //        _session80.SetPin(oldPin, newPin);
+            //    else
+            //        _session81.SetPin(oldPin, newPin);
+            // }
+        }
+
 
         /// <summary>
         /// Obtains information about a session
@@ -455,6 +555,37 @@ namespace Net.Pkcs11Interop.HighLevelAPI
                     _session81.Logout();
             }
         }
+
+        /// <summary>
+        /// Unlocks user pin
+        /// </summary>
+        public void UnlockUserPin()
+        {
+            if (this._disposed)
+                throw new ObjectDisposedException(this.GetType().FullName);
+
+            //if (Platform.UnmanagedLongSize == 4)
+            //{
+                if (Platform.StructPackingSize == 0)
+                    _session40.UnlockUserPin();
+                else
+                    _session41.UnlockUserPin();
+           // }
+           // else
+           // {
+            //    if (Platform.StructPackingSize == 0)
+            //        _session80.Login(userType, pin);
+            //    else
+            //        _session81.Login(userType, pin);
+           // }
+        }
+
+
+
+
+
+
+
 
         /// <summary>
         /// Creates a new object

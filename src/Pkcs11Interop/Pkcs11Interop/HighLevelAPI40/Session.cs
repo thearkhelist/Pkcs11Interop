@@ -9,7 +9,7 @@
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.к
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
@@ -110,11 +110,14 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
         {
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
-
+            Console.Write("C_CloseSession: ");
             CKR rv = _p11.C_CloseSession(_sessionId);
+            Console.WriteLine("-> {0}", rv);
             if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_CloseSession", rv);
 
+          
+                throw new Pkcs11Exception("C_CloseSession", rv);
+    
             _sessionId = CK.CK_INVALID_HANDLE;
         }
 
@@ -134,8 +137,9 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
                 pinValue = ConvertUtils.Utf8StringToBytes(userPin);
                 pinValueLen = Convert.ToUInt32(pinValue.Length);
             }
-
+            Console.WriteLine("C_InitPIN: ");
             CKR rv = _p11.C_InitPIN(_sessionId, pinValue, pinValueLen);
+            Console.WriteLine("-> {0}", rv);
             if (rv != CKR.CKR_OK)
                 throw new Pkcs11Exception("C_InitPIN", rv);
         }
@@ -348,6 +352,19 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
         }
 
         /// <summary>
+        /// Logs a user into a token
+        /// </summary>
+        public void UnlockUserPin()
+        {
+            if (this._disposed)
+                throw new ObjectDisposedException(this.GetType().FullName);
+
+            CKR rv = _p11.C_EX_UnblockUserPIN(_sessionId);
+            if (rv != CKR.CKR_OK)
+                throw new Pkcs11Exception("C_Login", rv);
+        }
+
+        /// <summary>
         /// Creates a new object
         /// </summary>
         /// <param name="attributes">Object attributes</param>
@@ -448,6 +465,39 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
 
             return objectSize;
         }
+
+
+        /// <summary>
+        /// Sets new extended token name
+        /// </summary>
+        public void SetTokenName(string tokenName)
+        {
+            if (this._disposed)
+                throw new ObjectDisposedException(this.GetType().FullName);
+            byte[] tokenNameValue = ConvertUtils.Utf8StringToBytes(tokenName);
+            uint tokenNameLen = Convert.ToUInt32(tokenNameValue.Length);
+            CKR rv = _p11.C_EX_SetTokenName(_sessionId, tokenNameValue, tokenNameLen);
+            if (rv != CKR.CKR_OK)
+                throw new Pkcs11Exception("C_EX_SetTokenName", rv);
+        }
+
+        /// <summary>
+        /// Gets extended token name
+        /// </summary>
+        public string GetTokenName()
+        {
+            uint tokenNameLen = 100;
+            byte[] tokenName = new byte[100];
+            if (this._disposed)
+                throw new ObjectDisposedException(this.GetType().FullName);
+            CKR rv = _p11.C_EX_GetTokenName(_sessionId, ref tokenName, ref tokenNameLen);
+            if (rv != CKR.CKR_OK)
+                throw new Pkcs11Exception("C_EX_GetTokenName", rv);
+            string strTokenName = ConvertUtils.BytesToBase64String(tokenName);
+            return strTokenName;
+
+        }
+
 
         /// <summary>
         /// Obtains the value of one or more attributes of an object
@@ -777,7 +827,7 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
             uint encryptedPartLen = Convert.ToUInt32(encryptedPart.Length);
             
             int bytesRead = 0;
-            while ((bytesRead = inputStream.Read(part, 0, part.Length)) > 0)
+            while ((bytesRead = inputStream.Read(part, 0, part.Length)) >= part.Length)
             {
                 encryptedPartLen = Convert.ToUInt32(encryptedPart.Length);
                 rv = _p11.C_EncryptUpdate(_sessionId, part, Convert.ToUInt32(bytesRead), encryptedPart, ref encryptedPartLen);
@@ -786,20 +836,23 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
 
                 outputStream.Write(encryptedPart, 0, Convert.ToInt32(encryptedPartLen));
             }
-
-            byte[] lastEncryptedPart = null;
-            uint lastEncryptedPartLen = 0;
-            rv = _p11.C_EncryptFinal(_sessionId, null, ref lastEncryptedPartLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_EncryptFinal", rv);
-
-            lastEncryptedPart = new byte[lastEncryptedPartLen];
+            uint lastEncryptedPartLen = Convert.ToUInt32(bytesRead);
+            byte[] lastEncryptedPart = new byte[lastEncryptedPartLen];
+            for (int i = 0; i < lastEncryptedPartLen; i++)
+            {
+                lastEncryptedPart[i] = part[i];
+            }
             rv = _p11.C_EncryptFinal(_sessionId, lastEncryptedPart, ref lastEncryptedPartLen);
             if (rv != CKR.CKR_OK)
                 throw new Pkcs11Exception("C_EncryptFinal", rv);
 
-            if (lastEncryptedPartLen > 0)
-                outputStream.Write(lastEncryptedPart, 0, Convert.ToInt32(lastEncryptedPartLen));
+            //lastEncryptedPart = new byte[lastEncryptedPartLen];
+            //rv = _p11.C_EncryptFinal(_sessionId, lastEncryptedPart, ref lastEncryptedPartLen);
+            //if (rv != CKR.CKR_OK)
+            //    throw new Pkcs11Exception("C_EncryptFinal", rv);
+
+            if (lastEncryptedPart.Length > 0)
+                outputStream.Write(lastEncryptedPart, 0, lastEncryptedPart.Length);
         }
 
         /// <summary>
@@ -900,18 +953,17 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
             if (bufferLength < 1)
                 throw new ArgumentException("Value has to be positive number", "bufferLength");
 
+            
             CK_MECHANISM ckMechanism = mechanism.CkMechanism;
 
             CKR rv = _p11.C_DecryptInit(_sessionId, ref ckMechanism, keyHandle.ObjectId);
             if (rv != CKR.CKR_OK)
                 throw new Pkcs11Exception("C_DecryptInit", rv);
-
             byte[] encryptedPart = new byte[bufferLength];
             byte[] part = new byte[bufferLength];
             uint partLen = Convert.ToUInt32(part.Length);
-
             int bytesRead = 0;
-            while ((bytesRead = inputStream.Read(encryptedPart, 0, encryptedPart.Length)) > 0)
+            while ((bytesRead = inputStream.Read(encryptedPart, 0, encryptedPart.Length)) >= encryptedPart.Length)
             {
                 partLen = Convert.ToUInt32(part.Length);
                 rv = _p11.C_DecryptUpdate(_sessionId, encryptedPart, Convert.ToUInt32(bytesRead), part, ref partLen);
@@ -921,19 +973,19 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
                 outputStream.Write(part, 0, Convert.ToInt32(partLen));
             }
 
-            byte[] lastPart = null;
-            uint lastPartLen = 0;
-            rv = _p11.C_DecryptFinal(_sessionId, null, ref lastPartLen);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_DecryptFinal", rv);
-
-            lastPart = new byte[lastPartLen];
+            uint lastPartLen = Convert.ToUInt32(bytesRead);
+            byte[] lastPart = new byte[lastPartLen];
+            for (int i = 0; i < lastPartLen; i++)
+            {
+                lastPart[i] = encryptedPart[i];
+            }
             rv = _p11.C_DecryptFinal(_sessionId, lastPart, ref lastPartLen);
             if (rv != CKR.CKR_OK)
                 throw new Pkcs11Exception("C_DecryptFinal", rv);
 
-            if (lastPartLen > 0)
-                outputStream.Write(lastPart, 0, Convert.ToInt32(lastPartLen));
+            if (lastPart.Length > 0)
+                outputStream.Write(lastPart, 0, Convert.ToInt32(lastPart.Length));
+            
         }
 
         /// <summary>
@@ -2154,10 +2206,14 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
 
             uint publicKeyId = CK.CK_INVALID_HANDLE;
             uint privateKeyId = CK.CK_INVALID_HANDLE;
+            Console.Write("C_GenerateKeyPair: ");
             CKR rv = _p11.C_GenerateKeyPair(_sessionId, ref ckMechanism, publicKeyTemplate, publicKeyTemplateLength, privateKeyTemplate, privateKeyTemplateLength, ref publicKeyId, ref privateKeyId);
             if (rv != CKR.CKR_OK)
+            {
+                Console.WriteLine(" -> {0}", rv);
                 throw new Pkcs11Exception("C_GenerateKeyPair", rv);
-
+            }
+            Console.WriteLine(" -> {0}", rv);
             publicKeyHandle = new ObjectHandle(publicKeyId);
             privateKeyHandle = new ObjectHandle(privateKeyId);
         }
@@ -2169,6 +2225,8 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
         /// <param name="wrappingKeyHandle">Handle of wrapping key</param>
         /// <param name="keyHandle">Handle of key to be wrapped</param>
         /// <returns>Wrapped key</returns>
+        /// 
+
         public byte[] WrapKey(Mechanism mechanism, ObjectHandle wrappingKeyHandle, ObjectHandle keyHandle)
         {
             if (this._disposed)
@@ -2188,13 +2246,17 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
             uint wrappedKeyLen = 0;
             CKR rv = _p11.C_WrapKey(_sessionId, ref ckMechanism, wrappingKeyHandle.ObjectId, keyHandle.ObjectId, null, ref wrappedKeyLen);
             if (rv != CKR.CKR_OK)
+            {              
                 throw new Pkcs11Exception("C_WrapKey", rv);
-
+            }
             byte[] wrappedKey = new byte[wrappedKeyLen];
+            
+            //byte[] wrappedKey = new byte[wrappedKeyLen];
             rv = _p11.C_WrapKey(_sessionId, ref ckMechanism, wrappingKeyHandle.ObjectId, keyHandle.ObjectId, wrappedKey, ref wrappedKeyLen);
             if (rv != CKR.CKR_OK)
+            {
                 throw new Pkcs11Exception("C_WrapKey", rv);
-
+            }
             if (wrappedKey.Length != wrappedKeyLen)
                 Array.Resize(ref wrappedKey, Convert.ToInt32(wrappedKeyLen));
 
@@ -2236,10 +2298,14 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
             }
 
             uint unwrappedKey = CK.CK_INVALID_HANDLE;
+            Console.Write("C_UnwrapKey: ");
             CKR rv = _p11.C_UnwrapKey(_sessionId, ref ckMechanism, unwrappingKeyHandle.ObjectId, wrappedKey, Convert.ToUInt32(wrappedKey.Length), template, templateLen, ref unwrappedKey);
             if (rv != CKR.CKR_OK)
+            {
+                Console.WriteLine("-> {0}", rv);
                 throw new Pkcs11Exception("C_UnwrapKey", rv);
-
+            }
+            Console.WriteLine("-> {0}", rv);
             return new ObjectHandle(unwrappedKey);
         }
 
@@ -2264,6 +2330,8 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
             CK_MECHANISM ckMechanism = mechanism.CkMechanism;
 
             CK_ATTRIBUTE[] template = null;
+            //ckMechanism.Parameter = (IntPtr) 0x0011b484;
+            //ckMechanism.ParameterLen = 0x00000014;
             uint templateLen = 0;
             if (attributes != null)
             {
@@ -2312,10 +2380,18 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
                 throw new ArgumentException("Value has to be positive number", "length");
 
             byte[] randomData = new byte[length];
+            /*            Console.Write("C_WrapKey: ");
+            CKR rv = _p11.C_WrapKey(_sessionId, ref ckMechanism, wrappingKeyHandle.ObjectId, keyHandle.ObjectId, null, ref wrappedKeyLen);
+            if (rv != CKR.CKR_OK)
+                Console.WriteLine("-> {0}", rv);*/
+            Console.Write("C_GenerateRandom: ");
             CKR rv = _p11.C_GenerateRandom(_sessionId, randomData, Convert.ToUInt32(length));
             if (rv != CKR.CKR_OK)
+            {
+                Console.WriteLine("-> {0}", rv);
                 throw new Pkcs11Exception("C_GenerateRandom", rv);
-
+            }
+            Console.WriteLine("-> {0}", rv);
             return randomData;
         }
 
@@ -2326,8 +2402,9 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
         {
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
-
+            Console.Write("C_GetFunctionStatus: ");
             CKR rv = _p11.C_GetFunctionStatus(_sessionId);
+            Console.WriteLine("-> {0}", rv);
             if (rv != CKR.CKR_OK)
                 throw new Pkcs11Exception("C_GetFunctionStatus", rv);
         }
@@ -2339,8 +2416,9 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
         {
             if (this._disposed)
                 throw new ObjectDisposedException(this.GetType().FullName);
-
+            Console.Write("C_CancelFunction: ");
             CKR rv = _p11.C_CancelFunction(_sessionId);
+            Console.WriteLine("-> {0}", rv);
             if (rv != CKR.CKR_OK)
                 throw new Pkcs11Exception("C_CancelFunction", rv);
         }

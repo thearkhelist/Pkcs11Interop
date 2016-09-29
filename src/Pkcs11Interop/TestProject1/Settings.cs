@@ -75,14 +75,29 @@ namespace Net.Pkcs11Interop.Tests
         public static string SecurityOfficerPin = @"87654321";
 
         /// <summary>
+        /// Wrong PIN of the normal user.
+        /// </summary>
+        public static string WrongUserPin = @"55555555";
+
+        /// <summary>
         /// PIN of the normal user.
         /// </summary>
         public static string NormalUserPin = @"12345678";
 
         /// <summary>
+        /// Wrong PIN of the normal user.
+        /// </summary>
+        public static string LocalUserPin = @"000000000000000000000000000000";
+
+        /// <summary>
         /// Application name that is used as a label for all objects created by these tests.
         /// </summary>
         public static string ApplicationName = @"Pkcs11Interop_ver2";
+
+        /// <summary>
+        /// Application name that is used as a label for all objects created by these tests.
+        /// </summary>
+        public static string LongApplicationName = @"I am very long label of Pkcs11Interop_ver2";
 
         #endregion
 

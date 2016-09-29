@@ -19,44 +19,51 @@
  *  Jaroslav IMRICH <jimrich@jimrich.sk>
  */
 
-using System;
-using System.Runtime.InteropServices;
-
-namespace Net.Pkcs11Interop.LowLevelAPI40.MechanismParams
+namespace Net.Pkcs11Interop.Common
 {
     /// <summary>
-    /// Provides the parameters for the CK_GOST3410_DERIVE_PARAMS
+    /// Bit flags
     /// </summary>
-    [StructLayout(LayoutKind.Sequential, Pack = 0, CharSet = CharSet.Unicode)]
-    public struct CK_GOST3410_DERIVE_PARAMS
+    public static class TOKEN_CLASS
     {
         /// <summary>
-        /// identifier of the key derivation function
+        ///TOKEN_CLASS_UNKNOWN
         /// </summary>
-        public ulong kdf;
-        
-        /// <summary>
-        /// pointer to data with public key of a receiver
-        /// </summary>
-        public IntPtr pPublicData;
+        public const uint TOKEN_CLASS_UNKNOWN = 0xFF;
 
         /// <summary>
-        /// length of data with public key of a receiver (must be 64)
+        ///TOKEN_CLASS_S
         /// </summary>
-        public UInt32 ulPublicDataLen;
+        public const uint TOKEN_CLASS_S = 0x00;
 
         /// <summary>
-        /// pointer to a UKM data
+        ///TOKEN_CLASS_UNKNOWN
         /// </summary>
-        public IntPtr pUKM;
-        
+        public const uint TOKEN_CLASS_ECP = 0x01;
+
         /// <summary>
-        /// length of UKM data in bytes (must be 8)
+        ///TOKEN_CLASS_UNKNOWN
         /// </summary>
-        public UInt32 ulUkmLen ;
+        public const uint TOKEN_CLASS_LITE = 0x02;
 
-        
+        /// <summary>
+        ///TOKEN_CLASS_UNKNOWN
+        /// </summary>
+        public const uint TOKEN_CLASS_WEB = 0x03;
 
+        /// <summary>
+        ///TOKEN_CLASS_UNKNOWN
+        /// </summary>
+        public const uint TOKEN_CLASS_PINPAD = 0x04;
 
+        /// <summary>
+        ///TOKEN_CLASS_UNKNOWN
+        /// </summary>
+        public const uint TOKEN_CLASS_ECPDUAL = 0x09;
+
+        /// <summary>
+        ///TOKEN_CLASS_UNKNOWN
+        /// </summary>
+        public const uint TOKEN_CLASS_KAZTOKEN = 0x11;
     }
 }

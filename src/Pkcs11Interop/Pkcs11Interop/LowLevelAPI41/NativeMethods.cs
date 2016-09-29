@@ -38,7 +38,7 @@ namespace Net.Pkcs11Interop.LowLevelAPI41
     
         [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
         internal static extern uint C_GetFunctionList(out IntPtr functionList);
-    
+
         [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
         internal static extern uint C_GetSlotList([MarshalAs(UnmanagedType.U1)] bool tokenPresent, uint[] slotList, ref uint count);
     
@@ -46,8 +46,8 @@ namespace Net.Pkcs11Interop.LowLevelAPI41
         internal static extern uint C_GetSlotInfo(uint slotId, ref CK_SLOT_INFO info);
     
         [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern uint C_GetTokenInfo(uint slotId, ref CK_TOKEN_INFO info);
-    
+        internal static extern uint C_GetTokenInfo(uint slotId, ref CK_TOKEN_INFO info);        
+
         [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
         internal static extern uint C_GetMechanismList(uint slotId, uint[] mechanismList, ref uint count);
     
@@ -230,5 +230,47 @@ namespace Net.Pkcs11Interop.LowLevelAPI41
     
         [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
         internal static extern uint C_WaitForSlotEvent(uint flags, ref uint slot, IntPtr reserved);
+
+
+        // External functions
+
+        [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern uint C_EX_GetFunctionListExtended(out IntPtr functionList);
+
+        [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern uint C_EX_InitToken(uint slotId, byte[] pin, uint pinLen, ref CK_RUTOKEN_INIT_PARAM initInfo_s);
+
+        [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern uint C_EX_GetTokenInfoExtended(uint slotId, ref CK_TOKEN_INFO_EXTENDED info);
+        
+        [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern uint C_EX_UnblockUserPIN(uint session);
+
+        [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern uint C_EX_SetTokenName(uint session, byte[] tokenName, uint tokenNameLen);
+
+        [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern uint C_EX_SetLicense(uint session, uint licenseNume, byte[] license, uint licenseLen);
+
+        [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern uint C_EX_GetLicense(uint session, uint licenseNume, byte[] license, ref uint licenseLen);
+
+        [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern uint C_EX_GetCertificateInfoText(uint session, uint cert, ref byte[] info, ref uint infoLen);
+
+        [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern uint C_EX_PKCS7Sign(uint session, byte[] data, uint dataLen, uint cert, byte[] envelope, uint envelopeLen, uint privKet, uint[] certificates, uint certificatesLen, uint flags);
+
+        [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern uint C_EX_CreateCSR(uint session, uint publicKey, byte[] dn, uint dnLength, byte[] csr, uint csrLength, uint privKet, byte[] attributes, uint attributesLen, byte[] extensions, uint extensionsLength);
+
+        [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern uint C_EX_FreeBuffer(byte[] buffer);
+
+        [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern uint C_EX_GetTokenName(uint session, byte[] tokenName, ref uint tokenNameLen);
+
+        [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern uint C_EX_SetLocalPIN(uint slotId, byte[] userPin, uint userPinLen, byte[] newLocalPin, uint newLocalPinLen, uint localID);
     }
 }

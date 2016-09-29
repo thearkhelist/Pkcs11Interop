@@ -37,6 +37,8 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
         [TestMethod]
         public void _01_BasicTokenInfoTest()
         {
+
+
             using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, Settings.UseOsLocking))
             {
                 // Find first slot with token present
@@ -45,9 +47,10 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                 // Get token info
                 TokenInfo tokenInfo = slot.GetTokenInfo();
 
-                Console.WriteLine(tokenInfo.TokenFlags.DualCryptoOperations);
+                
+
                 // Do something interesting with token info
-                Assert.IsFalse(String.IsNullOrEmpty(tokenInfo.ManufacturerId));
+                Assert.IsFalse(String.IsNullOrEmpty(tokenInfo.SerialNumber));
 
             }
         }

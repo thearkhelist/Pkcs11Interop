@@ -55,10 +55,14 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Common\Helpers.cs" />
-    <Compile Include="Common\_01_Pkcs11UriAndBuilderTest.cs" />
-    <Compile Include="Common\_02_CustomExceptionsTest.cs" />
     <Compile Include="ExtensionAttribute.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOSTR3411_12_512_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOSTR3411_12_256_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOSTR3410_512_KEY_PAIR_GEN_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOSTR3410_512_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOSTR3410_12_DERIVE_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOSTR3410_WITH_GOSTR3411_12_512_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOSTR3410_WITH_GOSTR3411_12_256_Tests.cs" />
     <Compile Include="HighLevelAPI\Helpers.cs" />
     <Compile Include="HighLevelAPI\CKM_RSA_PKCS_KEY_PAIR_GEN_Tests.cs" />
     <Compile Include="HighLevelAPI\CKM_RSA_PKCS_Tests.cs" />
@@ -72,8 +76,9 @@
     <Compile Include="HighLevelAPI\CKM_GOST28147_KEY_WRAP_Tests.cs" />
     <Compile Include="HighLevelAPI\CKM_GOST3411_Tests.cs" />
     <Compile Include="HighLevelAPI\CKM_GOST3411_HMAC_Tests.cs" />
-    <Compile Include="HighLevelAPI\CKM_GOST3410_KEY_WRAP_Tests.cs" />
-    <Compile Include="HighLevelAPI\CKM_GOST3410_DERIVE_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOSTR3410_KEY_WRAP_Tests.cs" />
+    <Compile Include="HighLevelAPI\CKM_GOSTR3410_DERIVE_Tests.cs" />
+    <Compile Include="HighLevelAPI\_31_ExtendedFunctionsTest.cs" />
     <Compile Include="HighLevelAPI\_01_InitializeTest.cs" />
     <Compile Include="HighLevelAPI\_02_GetInfoTest.cs" />
     <Compile Include="HighLevelAPI\_03_SlotListInfoAndEventTest.cs" />

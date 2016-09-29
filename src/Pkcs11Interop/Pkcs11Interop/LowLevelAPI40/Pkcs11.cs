@@ -70,6 +70,8 @@ namespace Net.Pkcs11Interop.LowLevelAPI40
         /// </summary>
         private Delegates _delegates = null;
 
+        private DelegatesExt _delegatesExt = null;
+
         /// <summary>
         /// Loads PCKS#11 library
         /// </summary>
@@ -82,6 +84,7 @@ namespace Net.Pkcs11Interop.LowLevelAPI40
                     _libraryHandle = UnmanagedLibrary.Load(libraryPath);
 
                 _delegates = new Delegates(_libraryHandle, true);
+                _delegatesExt = new DelegatesExt(_libraryHandle, true);
             }
             catch
             {
@@ -183,6 +186,22 @@ namespace Net.Pkcs11Interop.LowLevelAPI40
         }
 
         /// <summary>
+        /// Returns a pointer to the Cryptoki library's list of function pointers
+        /// </summary>
+        /// <param name="functionList">Pointer to a value which will receive a pointer to the library's CK_FUNCTION_LIST structure</param>
+        /// <returns>CKR_ARGUMENTS_BAD, CKR_FUNCTION_FAILED, CKR_GENERAL_ERROR, CKR_HOST_MEMORY, CKR_OK</returns>
+        public CKR C_EX_GetFunctionListExtended(out IntPtr functionList)
+        {
+            if (this._disposed)
+                throw new ObjectDisposedException(this.GetType().FullName);
+
+            uint rv = _delegatesExt.C_EX_GetFunctionListExtended(out functionList);
+            return (CKR)rv;
+        }
+
+
+
+        /// <summary>
         /// Obtains a list of slots in the system
         /// </summary>
         /// <param name="tokenPresent">Indicates whether the list obtained includes only those slots with a token present (true) or all slots (false)</param>
@@ -230,6 +249,24 @@ namespace Net.Pkcs11Interop.LowLevelAPI40
             uint rv = _delegates.C_GetTokenInfo(slotId, ref info);
             return (CKR)rv;
         }
+
+
+        /// <summary>
+        /// Obtains extended information about a particular token in the system
+        /// </summary>
+        /// <param name="slotId">The ID of the token's slot</param>
+        /// <param name="info">Structure that receives the token information</param>
+        /// <returns>CKR_CRYPTOKI_NOT_INITIALIZED, CKR_DEVICE_ERROR, CKR_DEVICE_MEMORY, CKR_DEVICE_REMOVED, CKR_FUNCTION_FAILED, CKR_GENERAL_ERROR, CKR_HOST_MEMORY, CKR_OK, CKR_SLOT_ID_INVALID, CKR_TOKEN_NOT_PRESENT, CKR_TOKEN_NOT_RECOGNIZED, CKR_ARGUMENTS_BAD</returns>
+        public CKR C_EX_GetTokenInfoExtended(uint slotId, ref CK_TOKEN_INFO_EXTENDED info)
+        {
+            if (this._disposed)
+                throw new ObjectDisposedException(this.GetType().FullName);
+
+            uint rv = _delegatesExt.C_EX_GetTokenInfoExtended(slotId, ref info);
+            return (CKR)rv;
+        }
+
+        
 
         /// <summary>
         /// Obtains a list of mechanism types supported by a token
@@ -291,6 +328,38 @@ namespace Net.Pkcs11Interop.LowLevelAPI40
                 throw new ObjectDisposedException(this.GetType().FullName);
 
             uint rv = _delegates.C_InitToken(slotId, pin, pinLen, label);
+            return (CKR)rv;
+        }
+
+        /// <summary>
+        /// Initializes a token
+        /// </summary>
+        /// <param name="slotId">The ID of the token's slot</param>
+        /// <param name="pin">SO's initial PIN or null to use protected authentication path (pinpad)</param>
+        /// <param name="pinLen">The length of the PIN in bytes</param>
+        /// <param name="param">CK_RUTOKEN_INIT_PARAM parametr</param>
+        /// <returns>CKR_CRYPTOKI_NOT_INITIALIZED, CKR_DEVICE_ERROR, CKR_DEVICE_MEMORY, CKR_DEVICE_REMOVED, CKR_FUNCTION_CANCELED, CKR_FUNCTION_FAILED, CKR_GENERAL_ERROR, CKR_HOST_MEMORY, CKR_OK, CKR_PIN_INCORRECT, CKR_PIN_LOCKED, CKR_SESSION_EXISTS, CKR_SLOT_ID_INVALID, CKR_TOKEN_NOT_PRESENT, CKR_TOKEN_NOT_RECOGNIZED, CKR_TOKEN_WRITE_PROTECTED, CKR_ARGUMENTS_BAD</returns>
+        public CKR C_EX_InitToken(uint slotId, byte[] pin, uint pinLen, CK_RUTOKEN_INIT_PARAM param)
+        {
+            if (this._disposed)
+                throw new ObjectDisposedException(this.GetType().FullName);
+
+            uint rv = _delegatesExt.C_EX_InitToken(slotId, pin, pinLen, param);
+            return (CKR)rv;
+        }
+
+
+        /// <summary>
+        /// Initializes the normal user's PIN
+        /// </summary>
+        /// <param name="session">The session's handle</param>
+        /// <returns>CKR_CRYPTOKI_NOT_INITIALIZED, CKR_DEVICE_ERROR, CKR_DEVICE_MEMORY, CKR_DEVICE_REMOVED, CKR_FUNCTION_CANCELED, CKR_FUNCTION_FAILED, CKR_GENERAL_ERROR, CKR_HOST_MEMORY, CKR_OK, CKR_PIN_INVALID, CKR_PIN_LEN_RANGE, CKR_SESSION_CLOSED, CKR_SESSION_READ_ONLY, CKR_SESSION_HANDLE_INVALID, CKR_TOKEN_WRITE_PROTECTED, CKR_USER_NOT_LOGGED_IN, CKR_ARGUMENTS_BAD</returns>
+        public CKR C_EX_UnblockUserPIN(uint session)
+        {
+            if (this._disposed)
+                throw new ObjectDisposedException(this.GetType().FullName);
+
+            uint rv = _delegatesExt.C_EX_UnblockUserPIN(session);
             return (CKR)rv;
         }
 
@@ -425,6 +494,41 @@ namespace Net.Pkcs11Interop.LowLevelAPI40
             uint rv = _delegates.C_SetOperationState(session, operationState, operationStateLen, encryptionKey, authenticationKey);
             return (CKR)rv;
         }
+
+        /// <summary>
+        /// Sets new token name
+        /// </summary>
+        /// <param name="session">The session's handle</param>
+        /// <param name="tokenName">New token name</param>
+        /// <param name="tokenNameLen">New token name length</param>
+        /// <returns>CKR_CRYPTOKI_NOT_INITIALIZED, CKR_DEVICE_ERROR, CKR_DEVICE_MEMORY, CKR_DEVICE_REMOVED, CKR_FUNCTION_FAILED, CKR_GENERAL_ERROR, CKR_HOST_MEMORY, CKR_OK, CKR_SESSION_CLOSED, CKR_SESSION_HANDLE_INVALID</returns>
+        public CKR C_EX_SetTokenName(uint session, byte[] tokenName, uint tokenNameLen)
+        {
+            uint rv = (uint)CKR.CKR_ARGUMENTS_BAD;
+            if (this._disposed)
+                throw new ObjectDisposedException(this.GetType().FullName);
+
+            rv = _delegatesExt.C_EX_SetTokenName(session, tokenName, tokenNameLen);
+            return (CKR)rv;
+        }
+
+        /// <summary>
+        /// Gets new token name
+        /// </summary>
+        /// <param name="session">The session's handle</param>
+        /// <param name="tokenName">New token name</param>
+        /// <param name="tokenNameLen">New token name length</param>
+        /// <returns>CKR_CRYPTOKI_NOT_INITIALIZED, CKR_DEVICE_ERROR, CKR_DEVICE_MEMORY, CKR_DEVICE_REMOVED, CKR_FUNCTION_FAILED, CKR_GENERAL_ERROR, CKR_HOST_MEMORY, CKR_OK, CKR_SESSION_CLOSED, CKR_SESSION_HANDLE_INVALID</returns>
+        public CKR C_EX_GetTokenName(uint session, ref byte[] tokenName, ref uint tokenNameLen)
+        {
+            if (this._disposed)
+                throw new ObjectDisposedException(this.GetType().FullName);
+
+            uint rv = _delegatesExt.C_EX_GetTokenName(session, ref tokenName, ref tokenNameLen);
+            return (CKR)rv;
+        }
+
+
 
         /// <summary>
         /// Logs a user into a token

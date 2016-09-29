@@ -88,6 +88,63 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
         }
 
         /// <summary>
+        /// Finds slot containing the token that matches criteria specified in Settings class
+        /// </summary>
+        /// <param name='pkcs11'>Initialized PKCS11 wrapper</param>
+        /// <returns>Slot containing the token that matches criteria</returns>
+        public static Slot GetUsableSlot11(Pkcs11 pkcs11)
+        {
+            // Get list of available slots with token present
+            List<Slot> slots = pkcs11.GetSlotList(true);
+
+            Assert.IsNotNull(slots);
+            Assert.IsTrue(slots.Count > 0);
+
+            // First slot with token present is OK...
+            Slot matchingSlot = slots[0];
+
+            // ...unless there are matching criteria specified in Settings class
+            if (Settings.TokenSerial != null || Settings.TokenLabel != null)
+            {
+                matchingSlot = null;
+
+                foreach (Slot slot in slots)
+                {
+                    TokenInfo tokenInfo = null;
+
+
+                    try
+                    {
+                        tokenInfo = slot.GetTokenInfo();
+
+                    }
+                    catch (Pkcs11Exception ex)
+                    {
+                        if (ex.RV != CKR.CKR_TOKEN_NOT_RECOGNIZED && ex.RV != CKR.CKR_TOKEN_NOT_PRESENT)
+                            throw;
+                    }
+
+                    if (tokenInfo == null)
+                        continue;
+
+                    if (!string.IsNullOrEmpty(Settings.TokenSerial))
+                        if (0 != string.Compare(Settings.TokenSerial, tokenInfo.SerialNumber, StringComparison.Ordinal))
+                            continue;
+
+                    if (!string.IsNullOrEmpty(Settings.TokenLabel))
+                        if (0 != string.Compare(Settings.TokenLabel, tokenInfo.Label, StringComparison.Ordinal))
+                            continue;
+
+                    matchingSlot = slot;
+                    break;
+                }
+            }
+
+            Assert.IsTrue(matchingSlot != null, "Token matching criteria specified in Settings class is not present");
+            return matchingSlot;
+        }
+
+        /// <summary>
         /// Creates the data object.
         /// </summary>
         /// <param name='session'>Read-write session with user logged in</param>
@@ -194,6 +251,55 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
 
                 
             
+        }
+
+
+        /// <summary>
+        /// Generates asymetric key pair 512.
+        /// </summary>
+        /// <param name='session'>Read-write session with user logged in</param>
+        /// <param name='publicKeyHandle'>Output parameter for public key object handle</param>
+        /// <param name='privateKeyHandle'>Output parameter for private key object handle</param>
+        public static void GenerateKeyPair512(Session session, out ObjectHandle publicKeyHandle, out ObjectHandle privateKeyHandle)
+        {
+            // The CKA_ID attribute is intended as a means of distinguishing multiple key pairs held by the same subject
+            byte[] ckaId = session.GenerateRandom(20);
+
+            /* Набор параметров КриптоПро A алгоритма ГОСТ Р 34.10-2012(512) */
+            byte[] GOST3410_2012_512_params_oid = { 0x06, 0x09, 0x2A, 0x85, 0x03, 0x07, 0x01, 0x02, 0x01, 0x02, 0x01 };
+
+            /* Набор параметров КриптоПро алгоритма ГОСТ Р 34.11-2012(512) */
+            byte[] GOST3411_2012_512_params_oid = { 0x06, 0x08, 0x2A, 0x85, 0x03, 0x07, 0x01, 0x01, 0x02, 0x03 };
+
+            // Prepare attribute template of new public key
+            List<ObjectAttribute> publicKeyAttributes = new List<ObjectAttribute>();
+            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_PUBLIC_KEY));
+            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_GOSTR3410_512));
+            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
+            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, false));
+            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
+            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_ID, ckaId));
+            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOSTR3410PARAMS, GOST3410_2012_512_params_oid));
+
+            // Prepare attribute template of new private key
+            List<ObjectAttribute> privateKeyAttributes = new List<ObjectAttribute>();
+            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_PRIVATE_KEY));
+            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, CKK.CKK_GOSTR3410_512));
+            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
+            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, true));
+            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, Settings.ApplicationName));
+            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_ID, ckaId));
+            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOSTR3410PARAMS, GOST3410_2012_512_params_oid));
+            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_GOSTR3411PARAMS, GOST3411_2012_512_params_oid));
+
+            // Specify key generation mechanism
+            Mechanism mechanism = new Mechanism(CKM.CKM_GOSTR3410_512_KEY_PAIR_GEN);
+
+            // Generate key pair
+            session.GenerateKeyPair(mechanism, publicKeyAttributes, privateKeyAttributes, out publicKeyHandle, out privateKeyHandle);
+
+
+
         }
     }
 }

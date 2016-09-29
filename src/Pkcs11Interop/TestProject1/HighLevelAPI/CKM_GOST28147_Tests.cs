@@ -78,34 +78,49 @@ namespace TestProject1.HighLevelAPI
                     // Specify encryption mechanism with initialization vector as parameter
                     Mechanism mechanism = new Mechanism(CKM.CKM_GOST28147, iv);
 
-                    byte[] sourceData = ConvertUtils.Utf8StringToBytes("Our new");
+                    int bufferLength = 32;
+                    byte[] sourceData = ConvertUtils.Utf8StringToBytes("Our new password is 12345678");
                     byte[] encryptedData = null;
                     byte[] decryptedData = null;
 
-                    // Multipart encryption can be used i.e. for encryption of streamed data
-                    using (MemoryStream inputStream = new MemoryStream(sourceData), outputStream = new MemoryStream())
+                    if (sourceData.Length <= bufferLength)
                     {
-                        // Encrypt data
-                        // Note that in real world application we would rather use bigger read buffer i.e. 4096
-                        session.Encrypt(mechanism, generatedKey, inputStream, outputStream, 8);
-
-                        // Read whole output stream to the byte array so we can compare results more easily
-                        encryptedData = outputStream.ToArray();
+                        encryptedData = session.Encrypt(mechanism, generatedKey, sourceData);
                     }
+                    else
+                    {
+
+                        // Multipart encryption can be used i.e. for encryption of streamed data
+                        using (MemoryStream inputStream = new MemoryStream(sourceData), outputStream = new MemoryStream())
+                        {
+                            // Encrypt data
+                            // Note that in real world application we would rather use bigger read buffer i.e. 4096
+                            session.Encrypt(mechanism, generatedKey, inputStream, outputStream, bufferLength);
+
+                            // Read whole output stream to the byte array so we can compare results more easily
+                            encryptedData = outputStream.ToArray();
+                        }
+                    }
+
 
                     // Do something interesting with encrypted data
-
-                    // Multipart decryption can be used i.e. for decryption of streamed data
-                    using (MemoryStream inputStream = new MemoryStream(encryptedData), outputStream = new MemoryStream())
+                    if (encryptedData.Length <= bufferLength)
                     {
-                        // Decrypt data
-                        // Note that in real world application we would rather use bigger read buffer i.e. 4096
-                        session.Decrypt(mechanism, generatedKey, inputStream, outputStream, 8);
-
-                        // Read whole output stream to the byte array so we can compare results more easily
-                        decryptedData = outputStream.ToArray();
+                        decryptedData = session.Decrypt(mechanism, generatedKey, encryptedData);
                     }
+                    else
+                    {
+                        // Multipart decryption can be used i.e. for decryption of streamed data
+                        using (MemoryStream inputStream = new MemoryStream(encryptedData), outputStream = new MemoryStream())
+                        {
+                            // Decrypt data
+                            // Note that in real world application we would rather use bigger read buffer i.e. 4096
+                            session.Decrypt(mechanism, generatedKey, inputStream, outputStream, bufferLength);
 
+                            // Read whole output stream to the byte array so we can compare results more easily
+                            decryptedData = outputStream.ToArray();
+                        }
+                    }
                     // Do something interesting with decrypted data
                     Assert.IsTrue(Convert.ToBase64String(sourceData) == Convert.ToBase64String(decryptedData));
 

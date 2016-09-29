@@ -22,9 +22,9 @@
 using System;
 using System.Collections.Generic;
 using Net.Pkcs11Interop.Common;
-using Net.Pkcs11Interop.LowLevelAPI40;
+using Net.Pkcs11Interop.LowLevelAPI80;
 
-namespace Net.Pkcs11Interop.HighLevelAPI40
+namespace Net.Pkcs11Interop.HighLevelAPI80
 {
     /// <summary>
     /// Logical reader that potentially contains a token
@@ -34,12 +34,12 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
         /// <summary>
         /// Low level PKCS#11 wrapper
         /// </summary>
-        private LowLevelAPI40.Pkcs11 _p11 = null;
+        private LowLevelAPI80.Pkcs11 _p11 = null;
 
         /// <summary>
         /// Low level PKCS#11 wrapper. Use with caution!
         /// </summary>
-        public LowLevelAPI40.Pkcs11 LowLevelPkcs11
+        public LowLevelAPI80.Pkcs11 LowLevelPkcs11
         {
             get
             {
@@ -50,12 +50,12 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
         /// <summary>
         /// PKCS#11 handle of slot
         /// </summary>
-        private uint _slotId = 0;
+        private ulong _slotId = 0;
         
         /// <summary>
         /// PKCS#11 handle of slot
         /// </summary>
-        public uint SlotId
+        public ulong SlotId
         {
             get
             {
@@ -68,7 +68,7 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
         /// </summary>
         /// <param name="pkcs11">Low level PKCS#11 wrapper</param>
         /// <param name="slotId">PKCS#11 handle of slot</param>
-        internal Slot(LowLevelAPI40.Pkcs11 pkcs11, uint slotId)
+        internal Slot(LowLevelAPI80.Pkcs11 pkcs11, ulong slotId)
         {
             if (pkcs11 == null)
                 throw new ArgumentNullException("pkcs11");
@@ -98,7 +98,6 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
         public TokenInfo GetTokenInfo()
         {
             CK_TOKEN_INFO tokenInfo = new CK_TOKEN_INFO();
-            uint size =  Convert.ToUInt32(Common.UnmanagedMemory.SizeOf(typeof(CK_TOKEN_INFO)));
             CKR rv = _p11.C_GetTokenInfo(_slotId, ref tokenInfo);
             if (rv != CKR.CKR_OK)
                 throw new Pkcs11Exception("C_GetTokenInfo", rv);
@@ -107,27 +106,12 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
         }
 
         /// <summary>
-        /// Obtains extended information about a particular token in the system.
-        /// </summary>
-        /// <returns>Token information</returns>
-        public TokenInfoExtended GetTokenInfoExtended()
-        {
-            CK_TOKEN_INFO_EXTENDED tokenInfo = new CK_TOKEN_INFO_EXTENDED();
-            tokenInfo.SizeofThisStructure = Convert.ToUInt32(Common.UnmanagedMemory.SizeOf(typeof(CK_TOKEN_INFO_EXTENDED)));
-            CKR rv = _p11.C_EX_GetTokenInfoExtended(_slotId, ref tokenInfo);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_GetTokenInfoExtended", rv);
-
-            return new TokenInfoExtended(_slotId, tokenInfo);
-        }
-
-        /// <summary>
         /// Obtains a list of mechanism types supported by a token
         /// </summary>
         /// <returns>List of mechanism types supported by a token</returns>
         public List<CKM> GetMechanismList()
         {
-            uint mechanismCount = 0;
+            ulong mechanismCount = 0;
             CKR rv = _p11.C_GetMechanismList(_slotId, null, ref mechanismCount);
             if (rv != CKR.CKR_OK)
                 throw new Pkcs11Exception("C_GetMechanismList", rv);
@@ -140,7 +124,7 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
             if (rv != CKR.CKR_OK)
                 throw new Pkcs11Exception("C_GetMechanismList", rv);
 
-            if (mechanismList.Length != mechanismCount)
+            if (mechanismList.Length != Convert.ToInt32(mechanismCount))
                 Array.Resize(ref mechanismList, Convert.ToInt32(mechanismCount));
 
             return new List<CKM>(mechanismList);
@@ -169,11 +153,11 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
         public void InitToken(string soPin, string label)
         {
             byte[] soPinValue = null;
-            uint soPinValueLen = 0;
+            ulong soPinValueLen = 0;
             if (soPin != null)
             {
                 soPinValue = ConvertUtils.Utf8StringToBytes(soPin);
-                soPinValueLen = Convert.ToUInt32(soPinValue.Length);
+                soPinValueLen = Convert.ToUInt64(soPinValue.Length);
             }
 
             byte[] tokenLabel = ConvertUtils.Utf8StringToBytes(label, 32, 0x20);
@@ -191,11 +175,11 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
         public void InitToken(byte[] soPin, byte[] label)
         {
             byte[] soPinValue = null;
-            uint soPinValueLen = 0;
+            ulong soPinValueLen = 0;
             if (soPin != null)
             {
                 soPinValue = soPin;
-                soPinValueLen = Convert.ToUInt32(soPin.Length);
+                soPinValueLen = Convert.ToUInt64(soPin.Length);
             }
 
             // PKCS#11 v2.20 page 113:
@@ -204,137 +188,15 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
             byte[] tokenLabel = new byte[32];
             for (int i = 0; i < tokenLabel.Length; i++)
                 tokenLabel[i] = 0x20;
-
+            
             if (label != null)
             {
                 if (label.Length > 32)
                     throw new Exception("Label too long");
                 Array.Copy(label, 0, tokenLabel, 0, label.Length);
             }
-
-            CKR rv = _p11.C_InitToken(_slotId, soPinValue, soPinValueLen, tokenLabel);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_InitToken", rv);
-        }
-
-
-        /// <summary>
-        /// Initializes a token
-        /// </summary>
-        /// <param name="soPin">SO's initial PIN</param>
-        /// <param name="label">Label of the token</param>
-        public void InitTokenExtended(string soPin, string label)
-        {
-            char[] Uspin = { '5', '5', '5', '5', '5', '5', '5', '5' };
-            byte[] SO_PIN = ConvertUtils.Utf8StringToBytes(soPin);
-            byte[] NEW_USER_PIN = new byte[8];
-            for (int i = 0; i < 8; i++)
-            {
-                NEW_USER_PIN[i] = Convert.ToByte(Uspin[i]);
-            }
-
-            CK_RUTOKEN_INIT_PARAM initInfo_st = new CK_RUTOKEN_INIT_PARAM();
-            initInfo_st.ulSizeofThisStructure = Convert.ToUInt32(Common.UnmanagedMemory.SizeOf(typeof(CK_RUTOKEN_INIT_PARAM)));
-            initInfo_st.UseRepairMode = 0;
-            if (SO_PIN != null)
-            {
-                initInfo_st.pNewAdminPin = UnmanagedMemory.Allocate(SO_PIN.Length);
-                UnmanagedMemory.Write(initInfo_st.pNewAdminPin, SO_PIN);
-                initInfo_st.ulNewAdminPinLen = Convert.ToUInt32(SO_PIN.Length);
-            }
-            if (NEW_USER_PIN != null)
-            {
-                initInfo_st.pNewUserPin = UnmanagedMemory.Allocate(NEW_USER_PIN.Length);
-                UnmanagedMemory.Write(initInfo_st.pNewUserPin, NEW_USER_PIN);
-                initInfo_st.ulNewUserPinLen = Convert.ToUInt32(NEW_USER_PIN.Length);
-            }
-            initInfo_st.ulMinAdminPinLen = 6;
-            initInfo_st.ulMinUserPinLen =  6;
-            initInfo_st.ChangeUserPINPolicy = (TOKEN_FLAGS.TOKEN_FLAGS_ADMIN_CHANGE_USER_PIN | TOKEN_FLAGS.TOKEN_FLAGS_USER_CHANGE_USER_PIN);
-            initInfo_st.ulMaxAdminRetryCount = 10;
-            initInfo_st.ulMaxUserRetryCount = 10;
-
-            byte[] soPinValue = null;
-            uint soPinValueLen = 0;
-            if (soPin != null)
-            {
-                soPinValue = ConvertUtils.Utf8StringToBytes(soPin);
-                soPinValueLen = Convert.ToUInt32(soPinValue.Length);
-            }
-            if (label != null)
-            {
-                byte[] tokenLabel = ConvertUtils.Utf8StringToBytes(label, 0x1b, 0x1b);
-                initInfo_st.ulLabelLen = Convert.ToUInt32(tokenLabel.Length);
-                initInfo_st.pTokenLabel = UnmanagedMemory.Allocate(tokenLabel.Length);
-                UnmanagedMemory.Write(initInfo_st.pTokenLabel, tokenLabel);
-            }
             
-
-            CKR rv = _p11.C_EX_InitToken(_slotId, soPinValue, soPinValueLen, initInfo_st);
-            if (rv != CKR.CKR_OK)
-                throw new Pkcs11Exception("C_InitToken", rv);
-        }
-
-        /// <summary>
-        /// Initializes a token
-        /// </summary>
-        /// <param name="soPin">SO's initial PIN</param>
-        /// <param name="label">Label of the token</param>
-        public void InitTokenExtended(byte[] soPin, byte[] label)
-        {
-            char[] Adpin = { '8', '7', '6', '5', '4', '3', '2', '1' };
-            /* Новый DEMO PIN-код Пользователя Рутокен */
-            char[] Uspin = { '5', '5', '5', '5', '5', '5', '5', '5' };
-            //string labelTSL = "Sample Rutoken label";
-            //byte[] TOKEN_STD_LABEL = Convert.(labelTSL);
-            byte[] TOKEN_STD_LABEL = { 0x70, 0x71 };
-            byte[] SO_PIN = new byte[8];
-            byte[] NEW_USER_PIN = new byte[8];
-            for (int i = 0; i > 8; i++)
-            {
-                SO_PIN[i] = Convert.ToByte(Adpin[i]);
-                NEW_USER_PIN[i] = Convert.ToByte(Uspin[i]);
-
-            }
-
-            CK_RUTOKEN_INIT_PARAM initInfo_st = new CK_RUTOKEN_INIT_PARAM();
-            initInfo_st.ulSizeofThisStructure = Convert.ToUInt32(Common.UnmanagedMemory.SizeOf(typeof(CK_RUTOKEN_INIT_PARAM)));
-            initInfo_st.UseRepairMode = 0;
-            if (SO_PIN != null)
-            {
-                initInfo_st.pNewAdminPin = UnmanagedMemory.Allocate(SO_PIN.Length);
-                UnmanagedMemory.Write(initInfo_st.pNewAdminPin, SO_PIN);
-                initInfo_st.ulNewAdminPinLen = Convert.ToUInt32(SO_PIN.Length);
-            }
-            if (NEW_USER_PIN != null)
-            {
-                initInfo_st.pNewUserPin = UnmanagedMemory.Allocate(NEW_USER_PIN.Length);
-                UnmanagedMemory.Write(initInfo_st.pNewUserPin, NEW_USER_PIN);
-                initInfo_st.ulNewUserPinLen = Convert.ToUInt32(NEW_USER_PIN.Length);
-            }
-            initInfo_st.ulMinAdminPinLen = 6;
-            initInfo_st.ulMinUserPinLen = 6;
-            initInfo_st.ChangeUserPINPolicy = (TOKEN_FLAGS.TOKEN_FLAGS_ADMIN_CHANGE_USER_PIN | TOKEN_FLAGS.TOKEN_FLAGS_USER_CHANGE_USER_PIN);
-            initInfo_st.ulMaxAdminRetryCount = 10;
-            initInfo_st.ulMaxUserRetryCount = 10;
-            if (TOKEN_STD_LABEL != null)
-            {
-                initInfo_st.pTokenLabel = UnmanagedMemory.Allocate(TOKEN_STD_LABEL.Length);
-                UnmanagedMemory.Write(initInfo_st.pTokenLabel, TOKEN_STD_LABEL);
-                initInfo_st.ulLabelLen = Convert.ToUInt32(TOKEN_STD_LABEL.Length);
-            }
-            initInfo_st.ulLabelLen = 32;
-            byte[] soPinValue = null;
-            uint soPinValueLen = 0;
-            if (soPin != null)
-            {
-                soPinValue = soPin;
-                soPinValueLen = Convert.ToUInt32(soPinValue.Length);
-            }
-
-            byte[] tokenLabel = label;
-
-            CKR rv = _p11.C_EX_InitToken(_slotId, soPinValue, soPinValueLen, initInfo_st);
+            CKR rv = _p11.C_InitToken(_slotId, soPinValue, soPinValueLen, tokenLabel);
             if (rv != CKR.CKR_OK)
                 throw new Pkcs11Exception("C_InitToken", rv);
         }
@@ -346,11 +208,11 @@ namespace Net.Pkcs11Interop.HighLevelAPI40
         /// <returns>Session</returns>
         public Session OpenSession(bool readOnly)
         {
-            uint flags = CKF.CKF_SERIAL_SESSION;
+            ulong flags = CKF.CKF_SERIAL_SESSION;
             if (!readOnly)
                 flags = flags | CKF.CKF_RW_SESSION;
 
-            uint sessionId = CK.CK_INVALID_HANDLE;
+            ulong sessionId = CK.CK_INVALID_HANDLE;
             CKR rv = _p11.C_OpenSession(_slotId, flags, IntPtr.Zero, IntPtr.Zero, ref sessionId);
             if (rv != CKR.CKR_OK)
                 throw new Pkcs11Exception("C_OpenSession", rv);

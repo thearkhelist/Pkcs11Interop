@@ -11,7 +11,7 @@ using Net.Pkcs11Interop.LowLevelAPI40;
 namespace TestProject1.HighLevelAPI
 {
     [TestClass]
-    public class CKM_GOST3410_DERIVE_Tests
+    public class CKM_GOSTR3410_12_DERIVE_Tests
     {
         [TestMethod]
         public void _01_BasicDeriveKeyTest()
@@ -30,7 +30,7 @@ namespace TestProject1.HighLevelAPI
                     // Generate symetric key
                     ObjectHandle privateKey = null;
                     ObjectHandle publicKey = null;
-                    Helpers.GenerateKeyPair(session, out publicKey, out privateKey);
+                    Helpers.GenerateKeyPair512(session, out publicKey, out privateKey);
 
                     //Copy public key data to CK_GOST3410_DERIVE_PARAMS
                     List<CKA> attributes = new List<CKA>();
@@ -44,7 +44,7 @@ namespace TestProject1.HighLevelAPI
                     // Specify derivation mechanism with parameters
                     byte[] ukm = session.GenerateRandom(8);
                     CkGOST3410DeriveParams mechanismParams = new CkGOST3410DeriveParams(ukm, data);
-                    Mechanism mechanism = new Mechanism(CKM.CKM_GOSTR3410_DERIVE, mechanismParams);
+                    Mechanism mechanism = new Mechanism(CKM.CKM_GOSTR3410_12_DERIVE, mechanismParams);
 
                    
 

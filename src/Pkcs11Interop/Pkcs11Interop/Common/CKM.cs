@@ -1371,6 +1371,62 @@ namespace Net.Pkcs11Interop.Common
         /// <summary>
         /// Permanently reserved for token vendors
         /// </summary>
-        CKM_VENDOR_DEFINED = 0x80000000
+        CKM_VENDOR_DEFINED = 0x80000000,
+
+        /// <summary>
+        /// NSSCK_VENDOR_PKCS11_RU_TEAM
+        /// </summary>
+        NSSCK_VENDOR_PKCS11_RU_TEAM = (CKM_VENDOR_DEFINED | 0x54321000),
+
+        /// <summary>
+        /// CK_VENDOR_PKCS11_RU_TEAM_TK26
+        /// </summary>
+        CK_VENDOR_PKCS11_RU_TEAM_TK26 = NSSCK_VENDOR_PKCS11_RU_TEAM,
+
+        /// <summary>
+        /// CKM_GOSTR3410_512_KEY_PAIR_GEN
+        /// </summary>
+        CKM_GOSTR3410_512_KEY_PAIR_GEN =     (CK_VENDOR_PKCS11_RU_TEAM_TK26 | 0x005),
+
+        /// <summary>
+        /// CKM_GOSTR3410_512_KEY_PAIR_GEN
+        /// </summary>
+        CKM_GOSTR3410_512  =               (CK_VENDOR_PKCS11_RU_TEAM_TK26 | 0x006),
+
+        /// <summary>
+        /// CKM_GOSTR3410_512_KEY_PAIR_GEN
+        /// </summary>
+        CKM_GOSTR3410_12_DERIVE = (CK_VENDOR_PKCS11_RU_TEAM_TK26 | 0x007),
+
+        /// <summary>
+        /// CKM_GOSTR3410_512_KEY_PAIR_GEN
+        /// </summary>
+        CKM_GOSTR3410_WITH_GOSTR3411_12_256 = (CK_VENDOR_PKCS11_RU_TEAM_TK26 | 0x008),
+
+        /// <summary>
+        /// CKM_GOSTR3410_512_KEY_PAIR_GEN
+        /// </summary>
+        CKM_GOSTR3410_WITH_GOSTR3411_12_512 = (CK_VENDOR_PKCS11_RU_TEAM_TK26 | 0x009),
+
+        /// <summary>
+        /// CKM_GOSTR3410_512_KEY_PAIR_GEN
+        /// </summary>
+        CKM_GOSTR3411_12_256 = (CK_VENDOR_PKCS11_RU_TEAM_TK26 | 0x0012),
+
+        /// <summary>
+        /// CKM_GOSTR3410_512_KEY_PAIR_GEN
+        /// </summary>
+        CKM_GOSTR3411_12_512 = (CK_VENDOR_PKCS11_RU_TEAM_TK26 | 0x013),
+
+        /// <summary>
+        /// CKM_GOSTR3410_512_KEY_PAIR_GEN
+        /// </summary>
+        CKM_GOSTR3411_12_256_HMAC = (CK_VENDOR_PKCS11_RU_TEAM_TK26 | 0x014),
+
+        /// <summary>
+        /// CKM_GOSTR3410_512_KEY_PAIR_GEN
+        /// </summary>
+        CKM_GOSTR3411_12_512_HMAC = (CK_VENDOR_PKCS11_RU_TEAM_TK26 | 0x015),
+
     }
 }

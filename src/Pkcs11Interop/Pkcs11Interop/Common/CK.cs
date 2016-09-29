@@ -133,5 +133,6 @@ namespace Net.Pkcs11Interop.Common
         /// Returned OTP format
         /// </summary>
         public const uint CK_OTP_OUTPUT_FORMAT = 7;
+
     }
 }

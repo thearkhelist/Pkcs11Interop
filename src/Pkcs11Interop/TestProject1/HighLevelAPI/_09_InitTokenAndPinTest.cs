@@ -45,7 +45,7 @@ namespace Net.Pkcs11Interop.Tests.HighLevelAPI
                 TokenInfo tokenInfo = slot.GetTokenInfo();
 
                 // Check if token needs to be initialized
-                if (!tokenInfo.TokenFlags.TokenInitialized)
+                //if (!tokenInfo.TokenFlags.TokenInitialized)
                 {
                     // Initialize token and SO (security officer) pin
                     slot.InitToken(Settings.SecurityOfficerPin, Settings.ApplicationName);

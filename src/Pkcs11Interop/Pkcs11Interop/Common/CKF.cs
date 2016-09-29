@@ -156,6 +156,7 @@ namespace Net.Pkcs11Interop.Common
         /// </summary>
         public const uint CKF_ENCRYPT = 0x00000100;
 
+
         /// <summary>
         /// True if the mechanism can be used with C_DecryptInit
         /// </summary>
@@ -290,5 +291,11 @@ namespace Net.Pkcs11Interop.Common
         /// True if the OTP returned shall be in a form suitable for human consumption
         /// </summary>
         public const uint CKF_USER_FRIENDLY_OTP = 0x00000020;
+
+        /// <summary>
+        /// CKF_ENCRYPTION
+        /// </summary>
+        public const uint CKF_ENCRYPTION = 0x01000000;
+                          
     }
 }

@@ -57,9 +57,8 @@ namespace Net.Pkcs11Interop.HighLevelAPI.MechanismParams
         /// <summary>
         /// Initializes a new instance of the CkEcdh1DeriveParams class.
         /// </summary>
-        /// <param name='kdf'>Key derivation function used on the shared secret value (CKD)</param>
-        /// <param name='ukm'>Some data shared between the two parties</param>
-        /// <param name='publicData'>Other party's EC public key value</param>
+        /// <param name='ukm'>UKM data</param>
+        /// <param name='publicData'>Public key value</param>
         public CkGOST3410DeriveParams(byte[] ukm, byte[] publicData)
         {
           

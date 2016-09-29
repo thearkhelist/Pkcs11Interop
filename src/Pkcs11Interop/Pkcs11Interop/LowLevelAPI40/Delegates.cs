@@ -36,7 +36,7 @@ namespace Net.Pkcs11Interop.LowLevelAPI40
     
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate uint C_GetFunctionListDelegate(out IntPtr functionList);
-    
+
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate uint C_GetSlotListDelegate([MarshalAs(UnmanagedType.U1)] bool tokenPresent, uint[] slotList, ref uint count);
     
@@ -46,6 +46,7 @@ namespace Net.Pkcs11Interop.LowLevelAPI40
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate uint C_GetTokenInfoDelegate(uint slotId, ref CK_TOKEN_INFO info);
     
+
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate uint C_GetMechanismListDelegate(uint slotId, uint[] mechanismList, ref uint count);
     
@@ -269,6 +270,7 @@ namespace Net.Pkcs11Interop.LowLevelAPI40
         /// </summary>
         internal C_GetTokenInfoDelegate C_GetTokenInfo = null;
 
+        
         /// <summary>
         /// Delegate for C_GetMechanismList
         /// </summary>
@@ -726,6 +728,7 @@ namespace Net.Pkcs11Interop.LowLevelAPI40
             C_Initialize = NativeMethods.C_Initialize;
             C_Finalize = NativeMethods.C_Finalize;
             C_GetInfo = NativeMethods.C_GetInfo;
+            //C_EX_GetFunctionListExtended = NativeMethods.C_EX_GetFunctionListExtended;
             C_GetFunctionList = NativeMethods.C_GetFunctionList;
             C_GetSlotList = NativeMethods.C_GetSlotList;
             C_GetSlotInfo = NativeMethods.C_GetSlotInfo;
@@ -803,6 +806,7 @@ namespace Net.Pkcs11Interop.LowLevelAPI40
             C_Finalize = UnmanagedLibrary.GetDelegateForFunctionPointer<C_FinalizeDelegate>(ckFunctionList.C_Finalize);
             C_GetInfo = UnmanagedLibrary.GetDelegateForFunctionPointer<C_GetInfoDelegate>(ckFunctionList.C_GetInfo);
             C_GetFunctionList = UnmanagedLibrary.GetDelegateForFunctionPointer<C_GetFunctionListDelegate>(ckFunctionList.C_GetFunctionList);
+            //C_EX_GetFunctionListExtended = UnmanagedLibrary.GetDelegateForFunctionPointer<C_EX_GetFunctionListExtendedDelegate>(ckFunctionList.C_EX_GetFunctionListExtended);
             C_GetSlotList = UnmanagedLibrary.GetDelegateForFunctionPointer<C_GetSlotListDelegate>(ckFunctionList.C_GetSlotList);
             C_GetSlotInfo = UnmanagedLibrary.GetDelegateForFunctionPointer<C_GetSlotInfoDelegate>(ckFunctionList.C_GetSlotInfo);
             C_GetTokenInfo = UnmanagedLibrary.GetDelegateForFunctionPointer<C_GetTokenInfoDelegate>(ckFunctionList.C_GetTokenInfo);

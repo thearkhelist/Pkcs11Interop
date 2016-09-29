@@ -181,6 +181,18 @@ namespace Net.Pkcs11Interop.HighLevelAPI
         }
 
         /// <summary>
+        /// Obtains information about a particular token in the system.
+        /// </summary>
+        /// <returns>Token information</returns>
+        public TokenInfoExtended GetTokenInfoExtended()
+        {
+            //if (Platform.UnmanagedLongSize == 4)
+                return /*(Platform.StructPackingSize == 0) ? new TokenInfo(_slot40.GetTokenInfoExtended()) :*/ new TokenInfoExtended(_slot41.GetTokenInfoExtended());
+            //else
+                //return (Platform.StructPackingSize == 0) ? new TokenInfo(_slot80.GetTokenInfoExtended()) : new TokenInfo(_slot81.GetTokenInfoExtended());
+        }
+
+        /// <summary>
         /// Obtains a list of mechanism types supported by a token
         /// </summary>
         /// <returns>List of mechanism types supported by a token</returns>
@@ -190,6 +202,14 @@ namespace Net.Pkcs11Interop.HighLevelAPI
                 return (Platform.StructPackingSize == 0) ? _slot40.GetMechanismList() : _slot41.GetMechanismList();
             else
                 return (Platform.StructPackingSize == 0) ? _slot80.GetMechanismList() : _slot81.GetMechanismList();
+        }
+
+        /// <summary>
+        /// Sets local pin
+        /// </summary>
+        public void SetLocalPIN(string oldPin, string newPin)
+        {
+            _slot41.SetLocalPIN(oldPin, newPin);
         }
 
         /// <summary>
@@ -248,6 +268,53 @@ namespace Net.Pkcs11Interop.HighLevelAPI
                     _slot80.InitToken(soPin, label);
                 else
                     _slot81.InitToken(soPin, label);
+            }
+        }
+
+        /// <summary>
+        /// Initializes a token
+        /// </summary>
+        /// <param name="soPin">SO's initial PIN</param>
+        /// <param name="newUserPin">New User PIN</param>
+        /// <param name="label">Label of the token</param>
+        public void InitTokenExtended(string soPin, string newUserPin, string label)
+        {
+            //if (Platform.UnmanagedLongSize == 4)
+            {
+               // if (Platform.StructPackingSize == 0)
+               //     _slot40.InitToken(soPin, label);
+                //else
+                    _slot41.InitTokenExtended(soPin, newUserPin, label);
+            }
+           // else
+            {
+               // if (Platform.StructPackingSize == 0)
+              //      _slot80.InitToken(soPin, label);
+              //  else
+              //      _slot81.InitToken(soPin, label);
+            }
+        }
+
+        /// <summary>
+        /// Initializes a token
+        /// </summary>
+        /// <param name="soPin">SO's initial PIN</param>
+        /// <param name="label">Label of the token</param>
+        public void InitTokenExtended(byte[] soPin, byte[] label)
+        {
+            //if (Platform.UnmanagedLongSize == 4)
+            {
+                //if (Platform.StructPackingSize == 0)
+                 //   _slot40.InitToken(soPin, label);
+               // else
+                    _slot41.InitTokenExtended(soPin, label);
+            }
+            //else
+            {
+               // if (Platform.StructPackingSize == 0)
+              //      _slot80.InitToken(soPin, label);
+              //  else
+               //     _slot81.InitToken(soPin, label);
             }
         }
 
